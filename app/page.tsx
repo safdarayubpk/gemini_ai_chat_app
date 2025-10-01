@@ -24,6 +24,21 @@ export default function Home() {
     return () => window.removeEventListener('toggleSidebar', handleToggleSidebar);
   }, []);
 
+  // Ensure page scrolls to top on load/refresh
+  useEffect(() => {
+    // Scroll to top immediately
+    window.scrollTo(0, 0);
+    
+    // Also ensure document body is at top
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Prevent any scroll restoration
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+  }, []);
+
   return (
     <div className="h-screen bg-slate-900 text-slate-100 overflow-hidden">
       <div className="flex h-full">

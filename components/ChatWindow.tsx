@@ -49,9 +49,11 @@ export default function ChatWindow() {
     }
   }, [messages]);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change (but not on initial load)
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
   }, [messages, isTyping]);
 
   // Online/offline detection
