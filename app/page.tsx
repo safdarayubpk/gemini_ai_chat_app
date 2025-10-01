@@ -26,22 +26,13 @@ export default function Home() {
 
   // Ensure page scrolls to top on load/refresh
   useEffect(() => {
-    // Scroll to top immediately
+    // Simple scroll to top
     window.scrollTo(0, 0);
-    
-    // Also ensure document body is at top
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
-    // Prevent any scroll restoration
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
   }, []);
 
   return (
-    <div className="h-screen bg-slate-900 text-slate-100 overflow-hidden">
-      <div className="flex h-full">
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      <div className="flex min-h-screen">
         {/* Sidebar - Full height from top to bottom */}
         <ChatSidebar 
           onNewChat={handleNewChat} 
