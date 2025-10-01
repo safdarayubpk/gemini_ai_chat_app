@@ -169,8 +169,8 @@ export default function ChatWindow() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Messages Area - Scrollable */}
+      <div className="flex-1 overflow-y-auto pb-32">
         <div className="max-w-4xl mx-auto">
           {/* Welcome State - Show Quick Actions when no messages */}
           {messages.length === 0 && (
@@ -213,15 +213,15 @@ export default function ChatWindow() {
                 </div>
               )}
               
-              {/* Scroll anchor with extra padding to ensure input doesn't hide content */}
+              {/* Scroll anchor */}
               <div ref={messagesEndRef} className="h-4" />
             </div>
           </div>
         </div>
       </div>
       
-      {/* Input Container */}
-      <div className="flex-shrink-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50">
+      {/* Input Container - Fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 lg:left-80 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 z-30">
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
