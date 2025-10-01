@@ -32,26 +32,26 @@ export default function Home() {
 
   return (
     <div className="h-screen bg-slate-900 text-slate-100 overflow-hidden">
-      <div className="flex h-full">
-        {/* Sidebar - Fixed from top to bottom */}
-        <ChatSidebar 
-          onNewChat={handleNewChat} 
-          isOpen={sidebarOpen} 
-          onToggle={() => setSidebarOpen(!sidebarOpen)} 
-        />
-        
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col lg:ml-0">
-          {/* Header - Fixed at top */}
-          <div className="fixed top-0 right-0 left-0 lg:left-80 z-40">
-            <Header />
-          </div>
-          
-          {/* Chat Window - Takes remaining space with proper padding */}
-          <div className="flex-1 pt-20">
-            <ChatWindow />
-          </div>
-        </div>
+      {/* Sidebar - Fixed from top to bottom */}
+      <ChatSidebar 
+        onNewChat={handleNewChat} 
+        isOpen={sidebarOpen} 
+        onToggle={() => setSidebarOpen(!sidebarOpen)} 
+      />
+      
+      {/* Header - Fixed at top of main content */}
+      <div className="fixed top-0 left-80 right-0 z-40 lg:block hidden">
+        <Header />
+      </div>
+      
+      {/* Mobile Header - Full width on mobile */}
+      <div className="fixed top-0 left-0 right-0 z-40 lg:hidden">
+        <Header />
+      </div>
+      
+      {/* Chat Window - Takes remaining space */}
+      <div className="h-full pt-20 lg:pl-80">
+        <ChatWindow />
       </div>
     </div>
   );

@@ -221,7 +221,73 @@ export default function ChatWindow() {
       </div>
       
       {/* Input Container - Fixed at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 lg:left-80 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 z-30">
+      <div className="fixed bottom-0 left-80 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 z-30 lg:block hidden">
+        <div className="max-w-4xl mx-auto">
+          {/* Input Area */}
+          <div className="p-4">
+            <div className="flex w-full gap-3 items-end">
+              <div className="flex-1 relative">
+                <textarea
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder={messages.length === 0 ? "Message Gemini..." : "Continue the conversation..."}
+                  disabled={isTyping || !isOnline}
+                  className="w-full min-h-[52px] max-h-32 px-4 py-3 bg-slate-700/50 border border-slate-600 text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden"
+                  style={{ 
+                    height: 'auto',
+                    minHeight: '52px'
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
+                    target.style.height = Math.min(target.scrollHeight, 128) + 'px';
+                  }}
+                  aria-label="Message input"
+                  rows={1}
+                />
+              </div>
+              <Button 
+                onClick={() => handleSend()}
+                disabled={!inputValue.trim() || isTyping || !isOnline}
+                className="h-12 w-12 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0"
+                aria-label="Send message"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </Button>
+            </div>
+          </div>
+          
+          {/* Footer */}
+          <div className="px-4 pb-4">
+            <div className="flex items-center justify-between text-xs text-slate-400">
+              <div className="flex items-center gap-4">
+                <span>Gemini can make mistakes. Consider checking important information.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  className="hover:text-slate-300 transition-colors"
+                  aria-label="Keyboard shortcuts"
+                >
+                  ⌘K
+                </button>
+                <span>•</span>
+                <button 
+                  className="hover:text-slate-300 transition-colors"
+                  aria-label="Settings"
+                >
+                  Settings
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Mobile Input Container - Full width on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 z-30 lg:hidden">
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
