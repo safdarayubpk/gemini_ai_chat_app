@@ -25,8 +25,8 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 dark:bg-slate-900">
-      <div className="flex h-screen">
+    <div className="h-screen bg-slate-900 text-slate-100 overflow-hidden">
+      <div className="flex h-full">
         {/* Sidebar - Full height from top to bottom */}
         <ChatSidebar 
           onNewChat={handleNewChat} 
@@ -35,12 +35,12 @@ export default function Home() {
         />
         
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col lg:ml-0">
+        <div className="flex-1 flex flex-col bg-slate-900 lg:ml-0">
           {/* Header - Only in main content area */}
           <Header />
           
           {/* Chat Window - Takes remaining space */}
-          <div className="flex-1">
+          <div className="flex-1 bg-slate-900">
             <ChatWindow />
           </div>
         </div>
