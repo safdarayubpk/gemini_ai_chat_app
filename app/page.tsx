@@ -58,7 +58,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="h-screen bg-slate-900 text-slate-100 overflow-hidden">
+    <div className="h-screen bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100 light:bg-white light:text-gray-900 overflow-hidden transition-colors duration-300">
       {/* Sidebar - Fixed from top to bottom */}
       <ChatSidebar 
         onNewChat={handleNewChat} 
