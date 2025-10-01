@@ -79,7 +79,7 @@ export default function Home() {
       <div className={`h-full pt-20 transition-all duration-300 ${
         sidebarHidden ? 'lg:pl-0' : 'lg:pl-80'
       }`}>
-        <ChatWindow />
+        <ChatWindow isSidebarHidden={sidebarHidden} />
       </div>
     </div>
   );

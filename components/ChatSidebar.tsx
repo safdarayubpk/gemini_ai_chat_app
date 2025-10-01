@@ -81,9 +81,9 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle, isHidden = fa
       {/* Sidebar */}
       <div className={`
         fixed top-0 left-0 h-screen w-80 bg-slate-800/95 backdrop-blur-sm border-r border-slate-700/50 z-50
-        transform transition-transform duration-300 ease-in-out
+        transform transition-all duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        ${isHidden ? 'lg:-translate-x-full' : 'lg:translate-x-0'}
+        ${isHidden ? 'lg:-translate-x-full lg:opacity-0 lg:pointer-events-none' : 'lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto'}
       `}>
         <div className="flex flex-col h-full">
           {/* Header */}
