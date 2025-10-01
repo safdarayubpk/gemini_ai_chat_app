@@ -9,6 +9,7 @@ import TypingIndicator from '@/components/TypingIndicator';
 import ErrorBanner from '@/components/ErrorBanner';
 import OfflineBanner from '@/components/OfflineBanner';
 import QuickActions from '@/components/QuickActions';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Message {
   id: string;
@@ -22,6 +23,7 @@ interface ChatWindowProps {
 }
 
 export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps) {
+  const { theme } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -191,13 +193,13 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
             <div className="flex-shrink-0 pt-8">
               {/* Greeting Section */}
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-slate-100 mb-2">
+                <h1 className="text-3xl font-bold text-slate-100 dark:text-slate-100 light:text-gray-900 mb-2 transition-colors duration-300">
                   Hello! 👋
                 </h1>
-                <p className="text-lg text-slate-300 mb-1">
+                <p className="text-lg text-slate-300 dark:text-slate-300 light:text-gray-600 mb-1 transition-colors duration-300">
                   I'm Gemini AI, your intelligent assistant.
                 </p>
-                <p className="text-slate-400">
+                <p className="text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
                   How can I help you today?
                 </p>
               </div>
@@ -235,7 +237,7 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
               {/* Typing Indicator */}
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="max-w-[70%] bg-slate-800/60 text-slate-100 p-3 rounded-lg rounded-bl-sm">
+                  <div className="max-w-[70%] bg-slate-800/60 dark:bg-slate-800/60 light:bg-gray-100 text-slate-100 dark:text-slate-100 light:text-gray-900 p-3 rounded-lg rounded-bl-sm transition-colors duration-300">
                     <TypingIndicator />
                   </div>
                 </div>
@@ -249,9 +251,9 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
       </div>
       
       {/* Input Container - Fixed at bottom */}
-      <div className={`fixed bottom-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 z-30 lg:block hidden transition-all duration-300 ${
+      <div className={`fixed bottom-0 right-0 backdrop-blur-sm border-t z-30 lg:block hidden transition-all duration-300 ${
         isSidebarHidden ? 'left-0' : 'left-80'
-      }`}>
+      } bg-slate-900/95 dark:bg-slate-900/95 light:bg-white/95 border-slate-700/50 dark:border-slate-700/50 light:border-gray-200/50`}>
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
@@ -263,7 +265,7 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   onKeyDown={handleKeyPress}
                   placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
                   disabled={isTyping || !isOnline}
-                  className="w-full min-h-[52px] max-h-32 px-4 py-3 bg-slate-700/50 border border-slate-600 text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden"
+                  className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-100 border-slate-600 dark:border-slate-600 light:border-gray-300 text-slate-100 dark:text-slate-100 light:text-gray-900 placeholder:text-slate-400 dark:placeholder:text-slate-400 light:placeholder:text-gray-500"
                   style={{ 
                     height: 'auto',
                     minHeight: '52px'
@@ -292,20 +294,20 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
           
           {/* Footer */}
           <div className="px-4 pb-4">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
               <div className="flex items-center gap-4">
                 <span>Gemini can make mistakes. Consider checking important information.</span>
               </div>
               <div className="flex items-center gap-2">
                 <button 
-                  className="hover:text-slate-300 transition-colors"
+                  className="hover:text-slate-300 dark:hover:text-slate-300 light:hover:text-gray-700 transition-colors duration-300"
                   aria-label="Keyboard shortcuts"
                 >
                   ⌘K
                 </button>
                 <span>•</span>
                 <button 
-                  className="hover:text-slate-300 transition-colors"
+                  className="hover:text-slate-300 dark:hover:text-slate-300 light:hover:text-gray-700 transition-colors duration-300"
                   aria-label="Settings"
                 >
                   Settings
@@ -317,7 +319,7 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
       </div>
       
       {/* Mobile Input Container - Full width on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 z-30 lg:hidden transition-all duration-300">
+      <div className="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t z-30 lg:hidden transition-all duration-300 bg-slate-900/95 dark:bg-slate-900/95 light:bg-white/95 border-slate-700/50 dark:border-slate-700/50 light:border-gray-200/50">
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
@@ -329,7 +331,7 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   onKeyDown={handleKeyPress}
                   placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
                   disabled={isTyping || !isOnline}
-                  className="w-full min-h-[52px] max-h-32 px-4 py-3 bg-slate-700/50 border border-slate-600 text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden"
+                  className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-100 border-slate-600 dark:border-slate-600 light:border-gray-300 text-slate-100 dark:text-slate-100 light:text-gray-900 placeholder:text-slate-400 dark:placeholder:text-slate-400 light:placeholder:text-gray-500"
                   style={{ 
                     height: 'auto',
                     minHeight: '52px'
@@ -358,20 +360,20 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
           
           {/* Footer */}
           <div className="px-4 pb-4">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
               <div className="flex items-center gap-4">
                 <span>Gemini can make mistakes. Consider checking important information.</span>
               </div>
               <div className="flex items-center gap-2">
                 <button 
-                  className="hover:text-slate-300 transition-colors"
+                  className="hover:text-slate-300 dark:hover:text-slate-300 light:hover:text-gray-700 transition-colors duration-300"
                   aria-label="Keyboard shortcuts"
                 >
                   ⌘K
                 </button>
                 <span>•</span>
                 <button 
-                  className="hover:text-slate-300 transition-colors"
+                  className="hover:text-slate-300 dark:hover:text-slate-300 light:hover:text-gray-700 transition-colors duration-300"
                   aria-label="Settings"
                 >
                   Settings

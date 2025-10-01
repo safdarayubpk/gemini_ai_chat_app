@@ -1,4 +1,7 @@
+"use client";
+
 import React from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface QuickAction {
   id: string;
@@ -42,25 +45,27 @@ const quickActions: QuickAction[] = [
 ];
 
 export default function QuickActions() {
+  const { theme } = useTheme();
+  
   return (
     <div className="w-full max-w-4xl mx-auto px-4 pb-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {quickActions.map((action) => (
           <button
             key={action.id}
-            className="group p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 hover:border-slate-600/50 transition-all duration-200 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+            className="group p-6 rounded-2xl border transition-all duration-300 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 bg-slate-800/50 dark:bg-slate-800/50 light:bg-gray-100 border-slate-700/50 dark:border-slate-700/50 light:border-gray-200 hover:bg-slate-700/50 dark:hover:bg-slate-700/50 light:hover:bg-gray-200 hover:border-slate-600/50 dark:hover:border-slate-600/50 light:hover:border-gray-300 focus:ring-offset-slate-900 dark:focus:ring-offset-slate-900 light:focus:ring-offset-white"
             onClick={action.onClick}
             aria-label={`${action.title}: ${action.description}`}
           >
             <div className="flex items-center gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-slate-700/50 group-hover:bg-slate-600/50 flex items-center justify-center text-slate-300 group-hover:text-slate-200 transition-colors">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300 bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-200 group-hover:bg-slate-600/50 dark:group-hover:bg-slate-600/50 light:group-hover:bg-gray-300 text-slate-300 dark:text-slate-300 light:text-gray-600 group-hover:text-slate-200 dark:group-hover:text-slate-200 light:group-hover:text-gray-700">
                 {action.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-medium text-slate-200 group-hover:text-slate-100 transition-colors">
+                <h3 className="text-lg font-medium transition-colors duration-300 text-slate-200 dark:text-slate-200 light:text-gray-800 group-hover:text-slate-100 dark:group-hover:text-slate-100 light:group-hover:text-gray-900">
                   {action.title}
                 </h3>
-                <p className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors mt-1">
+                <p className="text-sm transition-colors duration-300 mt-1 text-slate-400 dark:text-slate-400 light:text-gray-600 group-hover:text-slate-300 dark:group-hover:text-slate-300 light:group-hover:text-gray-700">
                   {action.description}
                 </p>
               </div>
