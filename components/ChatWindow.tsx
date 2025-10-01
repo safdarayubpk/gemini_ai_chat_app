@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,8 +8,18 @@ import MessageBubble from '@/components/MessageBubble';
 import TypingIndicator from '@/components/TypingIndicator';
 
 export default function ChatWindow() {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, []); // Scroll to bottom on component mount
+
   return (
-    <div className="flex flex-col h-[70vh] max-w-4xl mx-auto">
+    <div className="flex flex-col h-screen max-w-4xl mx-auto">
       <Card className="flex flex-col h-full bg-slate-800/50 border-slate-700/50">
         <CardContent className="flex-1 overflow-y-auto p-4">
           <div className="space-y-2">
@@ -46,10 +56,13 @@ This function uses recursion to calculate the factorial. It handles edge cases f
                 <TypingIndicator />
               </div>
             </div>
+            
+            {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
           </div>
         </CardContent>
         
-        <CardFooter className="border-t border-slate-700/50 p-4">
+        <CardFooter className="sticky bottom-0 bg-slate-800/50 border-t border-slate-700/50 p-4 mt-auto">
           <div className="flex w-full gap-2">
             <Input
               placeholder="Type your message here..."
@@ -57,6 +70,7 @@ This function uses recursion to calculate the factorial. It handles edge cases f
             />
             <Button 
               className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+              onClick={scrollToBottom}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
