@@ -24,17 +24,22 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <ChatSidebar 
-        onNewChat={handleNewChat} 
-        isOpen={sidebarOpen} 
-        onToggle={() => setSidebarOpen(!sidebarOpen)} 
-      />
+    <div className="min-h-screen bg-slate-900 text-slate-100 dark:bg-slate-900">
+      {/* Header */}
+      <Header />
       
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-0">
-        <ChatWindow />
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Sidebar */}
+        <ChatSidebar 
+          onNewChat={handleNewChat} 
+          isOpen={sidebarOpen} 
+          onToggle={() => setSidebarOpen(!sidebarOpen)} 
+        />
+        
+        {/* Main Content */}
+        <div className="flex-1 lg:ml-0">
+          <ChatWindow />
+        </div>
       </div>
     </div>
   );

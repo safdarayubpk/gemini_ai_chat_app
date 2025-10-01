@@ -4,8 +4,8 @@ import React from 'react';
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700">
-      <div className="flex items-center justify-between p-4 max-w-4xl mx-auto">
+    <header className="h-20 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700 flex items-center">
+      <div className="flex items-center justify-between w-full px-4">
         <div className="flex items-center gap-3">
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-slate-100 transition-colors"

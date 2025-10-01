@@ -166,19 +166,19 @@ export default function ChatWindow() {
   };
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-full flex flex-col">
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           {/* Welcome State - Show Quick Actions when no messages */}
           {messages.length === 0 && (
-            <div className="flex-shrink-0 pt-20">
+            <div className="flex-shrink-0 pt-8">
               <QuickActions />
             </div>
           )}
           
           {/* Messages Container */}
-          <div className="p-4 pb-32 pt-20">
+          <div className="p-4 pb-4">
             <div className="space-y-2">
               {/* Offline Banner */}
               {!isOnline && <OfflineBanner />}
@@ -218,8 +218,8 @@ export default function ChatWindow() {
         </div>
       </div>
       
-      {/* Fixed Input Container */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 lg:left-80">
+      {/* Input Container */}
+      <div className="flex-shrink-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50">
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
