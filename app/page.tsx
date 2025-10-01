@@ -1,30 +1,26 @@
+import Header from '@/components/Header';
+import QuickActions from '@/components/QuickActions';
+
 export default function Home() {
   return (
-    <div className="flex-1 flex items-center justify-center p-8">
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold text-slate-200 mb-4">
-          Welcome to Gemini AI Chat
-        </h2>
-        <p className="text-slate-400 mb-8">
-          Your AI-powered conversation partner is ready to help.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-          <div className="quick-action-card">
-            <h3 className="font-medium text-slate-200 mb-2">Start a conversation</h3>
-            <p className="text-sm text-slate-400">Ask me anything you'd like to know</p>
+    <div className="flex-1 flex flex-col">
+      {/* Greeting Header */}
+      <Header />
+      
+      {/* Quick Action Cards */}
+      <QuickActions />
+      
+      {/* Chat Area Placeholder */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
+            <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
           </div>
-          <div className="quick-action-card">
-            <h3 className="font-medium text-slate-200 mb-2">Get creative</h3>
-            <p className="text-sm text-slate-400">Write stories, poems, or brainstorm ideas</p>
-          </div>
-          <div className="quick-action-card">
-            <h3 className="font-medium text-slate-200 mb-2">Learn something new</h3>
-            <p className="text-sm text-slate-400">Explore topics and expand your knowledge</p>
-          </div>
-          <div className="quick-action-card">
-            <h3 className="font-medium text-slate-200 mb-2">Solve problems</h3>
-            <p className="text-sm text-slate-400">Get help with coding, math, or analysis</p>
-          </div>
+          <p className="text-slate-400 text-lg">
+            Start a conversation or choose an action above
+          </p>
         </div>
       </div>
     </div>
