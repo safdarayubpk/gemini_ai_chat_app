@@ -1,6 +1,9 @@
+"use client";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import React from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,11 +19,6 @@ export const metadata: Metadata = {
   title: "Gemini AI Chat",
   description: "AI chat app powered by Gemini API",
 };
-
-// ThemeToggle client component
-"use client";
-
-import React from 'react';
 
 function ThemeToggle() {
   return (
