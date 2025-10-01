@@ -168,35 +168,19 @@ export default function ChatWindow() {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Chat Header */}
-      <div className="flex-shrink-0 border-b border-slate-700/50 bg-slate-900/95 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold text-slate-100">
-              {messages.length === 0 ? 'New Chat' : 'Chat'}
-            </h1>
-            {messages.length > 0 && (
-              <span className="text-sm text-slate-400">
-                {messages.length} message{messages.length !== 1 ? 's' : ''}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           {/* Welcome State - Show Header and Quick Actions when no messages */}
           {messages.length === 0 && (
-            <div className="flex-shrink-0 pt-8">
+            <div className="flex-shrink-0 pt-20">
               <Header />
               <QuickActions />
             </div>
           )}
           
           {/* Messages Container */}
-          <div className="p-4 pb-32">
+          <div className="p-4 pb-32 pt-20">
             <div className="space-y-2">
               {/* Offline Banner */}
               {!isOnline && <OfflineBanner />}
