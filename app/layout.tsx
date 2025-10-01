@@ -17,7 +17,11 @@ export const metadata: Metadata = {
   description: "AI chat app powered by Gemini API",
 };
 
-// ThemeToggle placeholder component
+// ThemeToggle client component
+"use client";
+
+import React from 'react';
+
 function ThemeToggle() {
   return (
     <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700">
