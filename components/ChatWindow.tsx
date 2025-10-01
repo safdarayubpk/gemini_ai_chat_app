@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import MessageBubble from '@/components/MessageBubble';
+import TypingIndicator from '@/components/TypingIndicator';
 
 export default function ChatWindow() {
   return (
@@ -38,6 +39,13 @@ print(factorial(5))  # Output: 120
 This function uses recursion to calculate the factorial. It handles edge cases for negative numbers and returns 1 for 0 and 1.`}
               time="2:31 PM"
             />
+            
+            {/* Typing Indicator Example */}
+            <div className="flex justify-start">
+              <div className="max-w-[70%] bg-slate-800/60 text-slate-100 p-3 rounded-lg rounded-bl-sm">
+                <TypingIndicator />
+              </div>
+            </div>
           </div>
         </CardContent>
         
