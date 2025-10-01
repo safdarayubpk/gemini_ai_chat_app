@@ -15,11 +15,12 @@ interface ChatSidebarProps {
   onNewChat: () => void;
   isOpen: boolean;
   onToggle: () => void;
+  isHidden?: boolean;
   currentChatId?: string;
   onChatSelect?: (chatId: string) => void;
 }
 
-export default function ChatSidebar({ onNewChat, isOpen, onToggle, currentChatId, onChatSelect }: ChatSidebarProps) {
+export default function ChatSidebar({ onNewChat, isOpen, onToggle, isHidden = false, currentChatId, onChatSelect }: ChatSidebarProps) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -82,7 +83,7 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle, currentChatId
         fixed top-0 left-0 h-screen w-80 bg-slate-800/95 backdrop-blur-sm border-r border-slate-700/50 z-50
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0
+        ${isHidden ? 'lg:-translate-x-full' : 'lg:translate-x-0'}
       `}>
         <div className="flex flex-col h-full">
           {/* Header */}

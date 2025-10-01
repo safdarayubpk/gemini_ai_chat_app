@@ -221,7 +221,7 @@ export default function ChatWindow() {
       </div>
       
       {/* Input Container - Fixed at bottom */}
-      <div className="fixed bottom-0 left-80 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 z-30 lg:block hidden">
+      <div className="fixed bottom-0 left-80 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 z-30 lg:block hidden transition-all duration-300">
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
