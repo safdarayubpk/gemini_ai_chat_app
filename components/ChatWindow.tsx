@@ -8,7 +8,6 @@ import MessageBubble from '@/components/MessageBubble';
 import TypingIndicator from '@/components/TypingIndicator';
 import ErrorBanner from '@/components/ErrorBanner';
 import OfflineBanner from '@/components/OfflineBanner';
-import Header from '@/components/Header';
 import QuickActions from '@/components/QuickActions';
 
 interface Message {
@@ -171,10 +170,9 @@ export default function ChatWindow() {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
-          {/* Welcome State - Show Header and Quick Actions when no messages */}
+          {/* Welcome State - Show Quick Actions when no messages */}
           {messages.length === 0 && (
             <div className="flex-shrink-0 pt-20">
-              <Header />
               <QuickActions />
             </div>
           )}
