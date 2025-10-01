@@ -4,28 +4,26 @@ import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import MessageBubble from '@/components/MessageBubble';
 
 export default function ChatWindow() {
   return (
     <div className="flex flex-col h-[70vh] max-w-4xl mx-auto">
       <Card className="flex flex-col h-full bg-slate-800/50 border-slate-700/50">
         <CardContent className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-4">
-            {/* User Message */}
-            <div className="flex justify-end">
-              <div className="max-w-[80%] bg-blue-600 text-white p-3 rounded-lg rounded-br-sm">
-                <p className="text-sm">Hello! Can you help me write a Python function to calculate the factorial of a number?</p>
-              </div>
-            </div>
+          <div className="space-y-2">
+            <MessageBubble 
+              role="user" 
+              content="Hello! Can you help me write a Python function to calculate the factorial of a number?"
+              time="2:30 PM"
+            />
             
-            {/* Assistant Message */}
-            <div className="flex justify-start">
-              <div className="max-w-[80%] bg-slate-700 text-slate-100 p-3 rounded-lg rounded-bl-sm">
-                <p className="text-sm">
-                  Of course! Here's a Python function to calculate the factorial of a number:
-                </p>
-                <pre className="mt-2 text-xs bg-slate-800 p-2 rounded overflow-x-auto">
-{`def factorial(n):
+            <MessageBubble 
+              role="assistant" 
+              content={`Of course! Here's a Python function to calculate the factorial of a number:
+
+\`\`\`python
+def factorial(n):
     if n < 0:
         raise ValueError("Factorial is not defined for negative numbers")
     elif n == 0 or n == 1:
@@ -34,13 +32,12 @@ export default function ChatWindow() {
         return n * factorial(n - 1)
 
 # Example usage:
-print(factorial(5))  # Output: 120`}
-                </pre>
-                <p className="text-sm mt-2">
-                  This function uses recursion to calculate the factorial. It handles edge cases for negative numbers and returns 1 for 0 and 1.
-                </p>
-              </div>
-            </div>
+print(factorial(5))  # Output: 120
+\`\`\`
+
+This function uses recursion to calculate the factorial. It handles edge cases for negative numbers and returns 1 for 0 and 1.`}
+              time="2:31 PM"
+            />
           </div>
         </CardContent>
         
