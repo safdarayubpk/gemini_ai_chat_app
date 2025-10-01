@@ -166,9 +166,9 @@ export default function ChatWindow() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className="h-full flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto bg-slate-900">
+      <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           {/* Welcome State - Show Quick Actions when no messages */}
           {messages.length === 0 && (

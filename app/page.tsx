@@ -35,12 +35,14 @@ export default function Home() {
         />
         
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col bg-slate-900 lg:ml-0">
-          {/* Header - Only in main content area */}
-          <Header />
+        <div className="flex-1 flex flex-col lg:ml-0">
+          {/* Header - Sticky within main content area */}
+          <div className="sticky top-0 z-30">
+            <Header />
+          </div>
           
           {/* Chat Window - Takes remaining space */}
-          <div className="flex-1 bg-slate-900">
+          <div className="flex-1">
             <ChatWindow />
           </div>
         </div>

@@ -82,7 +82,7 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle, currentChatId
         fixed top-0 left-0 h-full w-80 bg-slate-800/95 backdrop-blur-sm border-r border-slate-700/50 z-50
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto lg:h-full
+        lg:translate-x-0 lg:static lg:z-auto lg:h-full lg:w-80
       `}>
         <div className="flex flex-col h-full">
           {/* Header */}
