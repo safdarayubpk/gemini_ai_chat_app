@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 // Type definitions for request/response
 interface ChatMessage {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 }
 
@@ -37,55 +37,81 @@ interface GeminiResponse {
   };
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse<ChatResponse>> {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<ChatResponse>> {
   try {
     // Check for Gemini API key
     const geminiApiKey = process.env.GEMINI_API_KEY;
     if (!geminiApiKey) {
-      console.error('GEMINI_API_KEY environment variable is not set');
+      console.error("GEMINI_API_KEY environment variable is not set");
       return NextResponse.json(
-        { success: false, error: 'Server configuration error' },
+        { success: false, error: "Server configuration error" },
         { status: 500 }
       );
     }
 
     // Parse the request body
     const body: ChatRequest = await request.json();
-    
+
     // Validate request body
     if (!body || !Array.isArray(body.messages) || body.messages.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Invalid request body. Expected { messages: [{ role, content }] }' },
+        {
+          success: false,
+          error:
+            "Invalid request body. Expected { messages: [{ role, content }] }",
+        },
         { status: 400 }
       );
     }
 
     // Validate message structure
     for (const message of body.messages) {
-      if (!message.role || !message.content || 
-          !['user', 'assistant'].includes(message.role) || 
-          typeof message.content !== 'string') {
+      if (
+        !message.role ||
+        !message.content ||
+        !["user", "assistant"].includes(message.role) ||
+        typeof message.content !== "string"
+      ) {
         return NextResponse.json(
-          { success: false, error: 'Invalid message format. Each message must have role and content.' },
+          {
+            success: false,
+            error:
+              "Invalid message format. Each message must have role and content.",
+          },
           { status: 400 }
         );
       }
     }
 
     // Convert to Gemini request format
+    // For now, let's send only the last user message to keep it simple
+    const lastUserMessage = body.messages
+      .filter((msg) => msg.role === "user")
+      .pop();
+    if (!lastUserMessage) {
+      return NextResponse.json(
+        { success: false, error: "No user message found" },
+        { status: 400 }
+      );
+    }
+
     const geminiRequest: GeminiRequest = {
-      contents: body.messages.map(message => ({
-        parts: [{ text: message.content }]
-      }))
+      contents: [
+        {
+          parts: [{ text: lastUserMessage.content }],
+        },
+      ],
     };
 
     // Call Gemini API
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(geminiRequest),
       }
@@ -93,9 +119,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<ChatRespo
 
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
-      console.error('Gemini API error:', geminiResponse.status, errorText);
+      console.error("Gemini API error:", geminiResponse.status, errorText);
       return NextResponse.json(
-        { success: false, error: 'Failed to get response from AI service' },
+        { success: false, error: "Failed to get response from AI service" },
         { status: 500 }
       );
     }
@@ -104,26 +130,26 @@ export async function POST(request: NextRequest): Promise<NextResponse<ChatRespo
 
     // Parse Gemini response
     if (geminiData.error) {
-      console.error('Gemini API error:', geminiData.error);
+      console.error("Gemini API error:", geminiData.error);
       return NextResponse.json(
-        { success: false, error: 'AI service returned an error' },
+        { success: false, error: "AI service returned an error" },
         { status: 500 }
       );
     }
 
     if (!geminiData.candidates || geminiData.candidates.length === 0) {
-      console.error('No candidates in Gemini response:', geminiData);
+      console.error("No candidates in Gemini response:", geminiData);
       return NextResponse.json(
-        { success: false, error: 'No response generated' },
+        { success: false, error: "No response generated" },
         { status: 500 }
       );
     }
 
     const assistantText = geminiData.candidates[0]?.content?.parts?.[0]?.text;
     if (!assistantText) {
-      console.error('No text in Gemini response:', geminiData);
+      console.error("No text in Gemini response:", geminiData);
       return NextResponse.json(
-        { success: false, error: 'Empty response from AI service' },
+        { success: false, error: "Empty response from AI service" },
         { status: 500 }
       );
     }
@@ -132,12 +158,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<ChatRespo
       { success: true, assistant: assistantText },
       { status: 200 }
     );
-    
   } catch (error) {
-    console.error('Chat API error:', error);
-    
+    console.error("Chat API error:", error);
+
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: "Internal server error" },
       { status: 500 }
     );
   }
