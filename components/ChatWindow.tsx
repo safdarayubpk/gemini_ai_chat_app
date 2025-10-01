@@ -186,9 +186,23 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
       {/* Messages Area - Scrollable */}
       <div className="flex-1 overflow-y-auto pb-32">
         <div className="max-w-4xl mx-auto">
-          {/* Welcome State - Show Quick Actions when no messages */}
+          {/* Welcome State - Show Greeting and Quick Actions when no messages */}
           {messages.length === 0 && (
             <div className="flex-shrink-0 pt-8">
+              {/* Greeting Section */}
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-slate-100 mb-2">
+                  Hello! 👋
+                </h1>
+                <p className="text-lg text-slate-300 mb-1">
+                  I'm Gemini AI, your intelligent assistant.
+                </p>
+                <p className="text-slate-400">
+                  How can I help you today?
+                </p>
+              </div>
+              
+              {/* Quick Actions */}
               <QuickActions />
             </div>
           )}
@@ -247,7 +261,7 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  placeholder={messages.length === 0 ? "Message Gemini..." : "Continue the conversation..."}
+                  placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
                   disabled={isTyping || !isOnline}
                   className="w-full min-h-[52px] max-h-32 px-4 py-3 bg-slate-700/50 border border-slate-600 text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden"
                   style={{ 
@@ -313,7 +327,7 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  placeholder={messages.length === 0 ? "Message Gemini..." : "Continue the conversation..."}
+                  placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
                   disabled={isTyping || !isOnline}
                   className="w-full min-h-[52px] max-h-32 px-4 py-3 bg-slate-700/50 border border-slate-600 text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden"
                   style={{ 
