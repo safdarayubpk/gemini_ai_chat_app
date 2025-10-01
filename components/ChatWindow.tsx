@@ -167,7 +167,7 @@ export default function ChatWindow() {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto relative">
+    <div className="max-w-4xl mx-auto relative">
       {/* Welcome State - Show Header and Quick Actions when no messages */}
       {messages.length === 0 && (
         <div className="flex-shrink-0">
@@ -176,8 +176,8 @@ export default function ChatWindow() {
         </div>
       )}
       
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 pb-24">
+      {/* Messages Container - No overflow, let page scroll */}
+      <div className="p-4 pb-24">
         <div className="space-y-2">
           {/* New Chat Button - Show when messages exist */}
           {messages.length > 0 && (

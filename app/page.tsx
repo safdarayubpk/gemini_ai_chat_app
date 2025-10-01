@@ -4,11 +4,9 @@ import ChatWindow from '@/components/ChatWindow';
 
 export default function Home() {
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="min-h-screen">
       {/* Chat Window with integrated header/quick actions */}
-      <div className="flex-1 p-4">
-        <ChatWindow />
-      </div>
+      <ChatWindow />
     </div>
   );
 }
