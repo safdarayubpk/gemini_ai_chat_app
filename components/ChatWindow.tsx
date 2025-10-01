@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import MessageBubble from '@/components/MessageBubble';
 import TypingIndicator from '@/components/TypingIndicator';
+import ErrorBanner from '@/components/ErrorBanner';
+import OfflineBanner from '@/components/OfflineBanner';
 
 interface Message {
   id: string;
@@ -19,6 +21,9 @@ export default function ChatWindow() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [lastUserMessage, setLastUserMessage] = useState<Message | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,19 +53,43 @@ export default function ChatWindow() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSend = async () => {
-    if (!inputValue.trim() || isTyping) return;
+  // Online/offline detection
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    const userMessage: Message = {
+    // Set initial state
+    setIsOnline(navigator.onLine);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const handleSend = async (retryMessage?: Message) => {
+    const messageToSend = retryMessage || {
       id: Date.now().toString(),
-      role: 'user',
+      role: 'user' as const,
       content: inputValue.trim(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Add user message immediately
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    if (!messageToSend.content.trim() || isTyping || !isOnline) return;
+
+    // Clear any existing errors
+    setError(null);
+
+    // Add user message immediately (only if not retrying)
+    if (!retryMessage) {
+      setMessages(prev => [...prev, messageToSend]);
+      setInputValue('');
+      setLastUserMessage(messageToSend);
+    }
+
     setIsTyping(true);
 
     try {
@@ -71,7 +100,7 @@ export default function ChatWindow() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          messages: [...messages, userMessage].map(msg => ({
+          messages: [...messages, messageToSend].map(msg => ({
             role: msg.role,
             content: msg.content
           }))
@@ -90,32 +119,33 @@ export default function ChatWindow() {
         };
 
         setMessages(prev => [...prev, assistantMessage]);
+        setLastUserMessage(null); // Clear retry message on success
       } else {
         // Handle API error
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: 'Sorry, there was an error processing your message. Please try again.',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-
-        setMessages(prev => [...prev, errorMessage]);
+        setError(data.error || 'Failed to get response from AI service');
       }
     } catch (error) {
       console.error('Error sending message:', error);
       
       // Handle network error
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Sorry, there was a network error. Please check your connection and try again.',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setMessages(prev => [...prev, errorMessage]);
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const handleRetry = () => {
+    if (lastUserMessage) {
+      handleSend(lastUserMessage);
+    }
+  };
+
+  const handleDismissError = () => {
+    setError(null);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -128,8 +158,20 @@ export default function ChatWindow() {
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto">
       <Card className="flex flex-col h-full bg-slate-800/50 border-slate-700/50">
-        <CardContent className="flex-1 overflow-y-auto p-4">
+        <CardContent className="flex-1 overflow-y-auto p-4 pb-6">
           <div className="space-y-2">
+            {/* Offline Banner */}
+            {!isOnline && <OfflineBanner />}
+            
+            {/* Error Banner */}
+            {error && (
+              <ErrorBanner 
+                error={error} 
+                onRetry={lastUserMessage ? handleRetry : undefined}
+                onDismiss={handleDismissError}
+              />
+            )}
+            
             {messages.length === 0 ? (
               <div className="text-center text-slate-400 py-8">
                 <p>Start a conversation by typing a message below!</p>
@@ -153,8 +195,8 @@ export default function ChatWindow() {
               </div>
             )}
             
-            {/* Scroll anchor */}
-            <div ref={messagesEndRef} />
+            {/* Scroll anchor with extra padding to ensure footer doesn't hide content */}
+            <div ref={messagesEndRef} className="h-4" />
           </div>
         </CardContent>
         
@@ -163,15 +205,17 @@ export default function ChatWindow() {
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message here..."
-              disabled={isTyping}
+              onKeyDown={handleKeyPress}
+              placeholder="Type your message here... (Enter to send, Shift+Enter for new line)"
+              disabled={isTyping || !isOnline}
               className="flex-1 bg-slate-700/50 border-slate-600 text-slate-100 placeholder:text-slate-400 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Message input"
             />
             <Button 
-              onClick={handleSend}
-              disabled={!inputValue.trim() || isTyping}
+              onClick={() => handleSend()}
+              disabled={!inputValue.trim() || isTyping || !isOnline}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Send message"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -184,3 +228,4 @@ export default function ChatWindow() {
     </div>
   );
 }
+
