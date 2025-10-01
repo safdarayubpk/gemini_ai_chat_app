@@ -5,13 +5,7 @@ import ChatWindow from '@/components/ChatWindow';
 export default function Home() {
   return (
     <div className="flex-1 flex flex-col">
-      {/* Greeting Header */}
-      <Header />
-      
-      {/* Quick Action Cards */}
-      <QuickActions />
-      
-      {/* Chat Window */}
+      {/* Chat Window with integrated header/quick actions */}
       <div className="flex-1 p-4">
         <ChatWindow />
       </div>

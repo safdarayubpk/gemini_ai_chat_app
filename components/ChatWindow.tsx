@@ -8,6 +8,8 @@ import MessageBubble from '@/components/MessageBubble';
 import TypingIndicator from '@/components/TypingIndicator';
 import ErrorBanner from '@/components/ErrorBanner';
 import OfflineBanner from '@/components/OfflineBanner';
+import Header from '@/components/Header';
+import QuickActions from '@/components/QuickActions';
 
 interface Message {
   id: string;
@@ -148,6 +150,15 @@ export default function ChatWindow() {
     setError(null);
   };
 
+  const handleNewChat = () => {
+    setMessages([]);
+    setError(null);
+    setLastUserMessage(null);
+    setInputValue('');
+    // Clear localStorage
+    localStorage.removeItem('chat-messages');
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -157,9 +168,35 @@ export default function ChatWindow() {
 
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto relative">
+      {/* Welcome State - Show Header and Quick Actions when no messages */}
+      {messages.length === 0 && (
+        <div className="flex-shrink-0">
+          <Header />
+          <QuickActions />
+        </div>
+      )}
+      
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto p-4 pb-24">
         <div className="space-y-2">
+          {/* New Chat Button - Show when messages exist */}
+          {messages.length > 0 && (
+            <div className="flex justify-center mb-4">
+              <Button
+                onClick={handleNewChat}
+                variant="outline"
+                size="sm"
+                className="bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-slate-200 hover:border-slate-500"
+                aria-label="Start new chat"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                New Chat
+              </Button>
+            </div>
+          )}
+          
           {/* Offline Banner */}
           {!isOnline && <OfflineBanner />}
           
@@ -172,21 +209,17 @@ export default function ChatWindow() {
             />
           )}
           
-          {messages.length === 0 ? (
-            <div className="text-center text-slate-400 py-8">
-              <p>Start a conversation by typing a message below!</p>
-            </div>
-          ) : (
-            messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                role={message.role}
-                content={message.content}
-                time={message.time}
-              />
-            ))
-          )}
+          {/* Messages */}
+          {messages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              role={message.role}
+              content={message.content}
+              time={message.time}
+            />
+          ))}
           
+          {/* Typing Indicator */}
           {isTyping && (
             <div className="flex justify-start">
               <div className="max-w-[70%] bg-slate-800/60 text-slate-100 p-3 rounded-lg rounded-bl-sm">
@@ -208,7 +241,7 @@ export default function ChatWindow() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Type your message here... (Enter to send, Shift+Enter for new line)"
+              placeholder={messages.length === 0 ? "Type your message here... (Enter to send, Shift+Enter for new line)" : "Continue the conversation..."}
               disabled={isTyping || !isOnline}
               className="flex-1 bg-slate-700/50 border-slate-600 text-slate-100 placeholder:text-slate-400 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Message input"
