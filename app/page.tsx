@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import QuickActions from '@/components/QuickActions';
 import ChatWindow from '@/components/ChatWindow';
@@ -13,6 +13,16 @@ export default function Home() {
     // This will be handled by ChatWindow
     setSidebarOpen(false); // Close sidebar on mobile after new chat
   };
+
+  // Listen for sidebar toggle events from header
+  useEffect(() => {
+    const handleToggleSidebar = () => {
+      setSidebarOpen(prev => !prev);
+    };
+
+    window.addEventListener('toggleSidebar', handleToggleSidebar);
+    return () => window.removeEventListener('toggleSidebar', handleToggleSidebar);
+  }, []);
 
   return (
     <div className="min-h-screen flex">
