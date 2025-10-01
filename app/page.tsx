@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Header from '@/components/Header';
 import QuickActions from '@/components/QuickActions';
 import ChatWindow from '@/components/ChatWindow';
 import ChatSidebar from '@/components/ChatSidebar';
