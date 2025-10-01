@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -76,6 +76,16 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Listen for new chat events from sidebar
+  useEffect(() => {
+    const handleNewChat = () => {
+      handleNewChatInternal();
+    };
+
+    window.addEventListener('newChat', handleNewChat);
+    return () => window.removeEventListener('newChat', handleNewChat);
+  }, [handleNewChatInternal]);
 
   const handleSend = async (retryMessage?: Message) => {
     const messageToSend = retryMessage || {
@@ -155,14 +165,14 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
     setError(null);
   };
 
-  const handleNewChat = () => {
+  const handleNewChatInternal = useCallback(() => {
     setMessages([]);
     setError(null);
     setLastUserMessage(null);
     setInputValue('');
     // Clear localStorage
     localStorage.removeItem('chat-messages');
-  };
+  }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

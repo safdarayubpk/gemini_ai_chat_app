@@ -11,8 +11,12 @@ export default function Home() {
   const [sidebarHidden, setSidebarHidden] = useState(false);
 
   const handleNewChat = () => {
-    // This will be handled by ChatWindow
-    setSidebarOpen(false); // Close sidebar on mobile after new chat
+    // Dispatch event to clear chat messages
+    const event = new CustomEvent('newChat');
+    window.dispatchEvent(event);
+    
+    // Close sidebar on mobile after new chat
+    setSidebarOpen(false);
   };
 
   // Listen for sidebar toggle events from header

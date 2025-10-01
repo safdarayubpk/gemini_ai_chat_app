@@ -24,6 +24,7 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle, isHidden = fa
   const [chats, setChats] = useState<Chat[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [isCreatingNewChat, setIsCreatingNewChat] = useState(false);
 
   // Load chats from localStorage
   useEffect(() => {
@@ -102,14 +103,26 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle, isHidden = fa
             </div>
             
             <Button
-              onClick={onNewChat}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 h-12 text-sm font-medium flex items-center justify-center gap-2"
+              onClick={() => {
+                setIsCreatingNewChat(true);
+                onNewChat();
+                // Reset loading state after a short delay
+                setTimeout(() => setIsCreatingNewChat(false), 500);
+              }}
+              disabled={isCreatingNewChat}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 h-12 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Start new chat"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              New Chat
+              {isCreatingNewChat ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              )}
+              {isCreatingNewChat ? 'Creating...' : 'New Chat'}
             </Button>
             
             {/* Search */}
