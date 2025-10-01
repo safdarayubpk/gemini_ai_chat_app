@@ -1,25 +1,135 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+// Type definitions for request/response
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface ChatRequest {
+  messages: ChatMessage[];
+}
+
+interface ChatResponse {
+  success: boolean;
+  assistant?: string;
+  error?: string;
+}
+
+interface GeminiRequest {
+  contents: Array<{
+    parts: Array<{
+      text: string;
+    }>;
+  }>;
+}
+
+interface GeminiResponse {
+  candidates?: Array<{
+    content: {
+      parts: Array<{
+        text: string;
+      }>;
+    };
+  }>;
+  error?: {
+    message: string;
+  };
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse<ChatResponse>> {
   try {
-    // Parse the request body
-    const body = await request.json();
-    
-    // Basic validation - ensure we have a message field
-    if (!body || typeof body.message !== 'string') {
+    // Check for Gemini API key
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      console.error('GEMINI_API_KEY environment variable is not set');
       return NextResponse.json(
-        { success: false, error: 'Invalid request body. Expected { message: string }' },
+        { success: false, error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
+    // Parse the request body
+    const body: ChatRequest = await request.json();
+    
+    // Validate request body
+    if (!body || !Array.isArray(body.messages) || body.messages.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid request body. Expected { messages: [{ role, content }] }' },
         { status: 400 }
       );
     }
 
-    // TODO: Integrate with Gemini API
-    // The Gemini API key will be available at process.env.GEMINI_API_KEY (server-only)
-    // We'll add the actual Gemini API call in the next implementation step
-    
-    // For now, return a test response
+    // Validate message structure
+    for (const message of body.messages) {
+      if (!message.role || !message.content || 
+          !['user', 'assistant'].includes(message.role) || 
+          typeof message.content !== 'string') {
+        return NextResponse.json(
+          { success: false, error: 'Invalid message format. Each message must have role and content.' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Convert to Gemini request format
+    const geminiRequest: GeminiRequest = {
+      contents: body.messages.map(message => ({
+        parts: [{ text: message.content }]
+      }))
+    };
+
+    // Call Gemini API
+    const geminiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(geminiRequest),
+      }
+    );
+
+    if (!geminiResponse.ok) {
+      const errorText = await geminiResponse.text();
+      console.error('Gemini API error:', geminiResponse.status, errorText);
+      return NextResponse.json(
+        { success: false, error: 'Failed to get response from AI service' },
+        { status: 500 }
+      );
+    }
+
+    const geminiData: GeminiResponse = await geminiResponse.json();
+
+    // Parse Gemini response
+    if (geminiData.error) {
+      console.error('Gemini API error:', geminiData.error);
+      return NextResponse.json(
+        { success: false, error: 'AI service returned an error' },
+        { status: 500 }
+      );
+    }
+
+    if (!geminiData.candidates || geminiData.candidates.length === 0) {
+      console.error('No candidates in Gemini response:', geminiData);
+      return NextResponse.json(
+        { success: false, error: 'No response generated' },
+        { status: 500 }
+      );
+    }
+
+    const assistantText = geminiData.candidates[0]?.content?.parts?.[0]?.text;
+    if (!assistantText) {
+      console.error('No text in Gemini response:', geminiData);
+      return NextResponse.json(
+        { success: false, error: 'Empty response from AI service' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { success: true, message: 'ok' },
+      { success: true, assistant: assistantText },
       { status: 200 }
     );
     
@@ -32,3 +142,21 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+/*
+Local testing with curl:
+
+curl -X POST http://localhost:3004/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      { "role": "user", "content": "Hello! Can you help me write a Python function?" }
+    ]
+  }'
+
+Expected response:
+{
+  "success": true,
+  "assistant": "Of course! I'd be happy to help you write a Python function..."
+}
+*/

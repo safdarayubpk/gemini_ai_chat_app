@@ -64,23 +64,28 @@ export default function ChatWindow() {
     setIsTyping(true);
 
     try {
-      // Call the API
+      // Call the API with all messages for context
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userMessage.content }),
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage].map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }))
+        }),
       });
 
       const data = await response.json();
 
-      if (data.success) {
-        // Add assistant response
+      if (data.success && data.assistant) {
+        // Add assistant response from Gemini
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: 'Thank you for your message! This is a test response from the API. The Gemini integration will be added next.',
+          content: data.assistant,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
