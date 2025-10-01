@@ -77,6 +77,15 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
     };
   }, []);
 
+  const handleNewChatInternal = useCallback(() => {
+    setMessages([]);
+    setError(null);
+    setLastUserMessage(null);
+    setInputValue('');
+    // Clear localStorage
+    localStorage.removeItem('chat-messages');
+  }, []);
+
   // Listen for new chat events from sidebar
   useEffect(() => {
     const handleNewChat = () => {
@@ -164,15 +173,6 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
   const handleDismissError = () => {
     setError(null);
   };
-
-  const handleNewChatInternal = useCallback(() => {
-    setMessages([]);
-    setError(null);
-    setLastUserMessage(null);
-    setInputValue('');
-    // Clear localStorage
-    localStorage.removeItem('chat-messages');
-  }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
