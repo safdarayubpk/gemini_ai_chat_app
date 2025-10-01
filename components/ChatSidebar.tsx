@@ -36,24 +36,23 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle }: ChatSidebar
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-4 border-b border-slate-700/50">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-100">Chats</h2>
-              <Button
-                onClick={onNewChat}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 h-8 text-sm"
-                aria-label="Start new chat"
-              >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                New
-              </Button>
-            </div>
+            <Button
+              onClick={onNewChat}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 h-12 text-sm font-medium flex items-center justify-center gap-2"
+              aria-label="Start new chat"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              New Chat
+            </Button>
           </div>
           
           {/* Chat List */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-2">
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4">
+              <h3 className="text-sm font-medium text-slate-400 mb-3">Recent Chats</h3>
+              <div className="space-y-2">
               {chats.map((chat) => (
                 <div
                   key={chat.id}
@@ -96,6 +95,7 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle }: ChatSidebar
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </div>
           
