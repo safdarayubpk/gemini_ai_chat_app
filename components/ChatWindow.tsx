@@ -156,51 +156,53 @@ export default function ChatWindow() {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto">
-      <Card className="flex flex-col h-full bg-slate-800/50 border-slate-700/50">
-        <CardContent className="flex-1 overflow-y-auto p-4 pb-6">
-          <div className="space-y-2">
-            {/* Offline Banner */}
-            {!isOnline && <OfflineBanner />}
-            
-            {/* Error Banner */}
-            {error && (
-              <ErrorBanner 
-                error={error} 
-                onRetry={lastUserMessage ? handleRetry : undefined}
-                onDismiss={handleDismissError}
+    <div className="flex flex-col h-screen max-w-4xl mx-auto relative">
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto p-4 pb-24">
+        <div className="space-y-2">
+          {/* Offline Banner */}
+          {!isOnline && <OfflineBanner />}
+          
+          {/* Error Banner */}
+          {error && (
+            <ErrorBanner 
+              error={error} 
+              onRetry={lastUserMessage ? handleRetry : undefined}
+              onDismiss={handleDismissError}
+            />
+          )}
+          
+          {messages.length === 0 ? (
+            <div className="text-center text-slate-400 py-8">
+              <p>Start a conversation by typing a message below!</p>
+            </div>
+          ) : (
+            messages.map((message) => (
+              <MessageBubble
+                key={message.id}
+                role={message.role}
+                content={message.content}
+                time={message.time}
               />
-            )}
-            
-            {messages.length === 0 ? (
-              <div className="text-center text-slate-400 py-8">
-                <p>Start a conversation by typing a message below!</p>
+            ))
+          )}
+          
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="max-w-[70%] bg-slate-800/60 text-slate-100 p-3 rounded-lg rounded-bl-sm">
+                <TypingIndicator />
               </div>
-            ) : (
-              messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  role={message.role}
-                  content={message.content}
-                  time={message.time}
-                />
-              ))
-            )}
-            
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="max-w-[70%] bg-slate-800/60 text-slate-100 p-3 rounded-lg rounded-bl-sm">
-                  <TypingIndicator />
-                </div>
-              </div>
-            )}
-            
-            {/* Scroll anchor with extra padding to ensure footer doesn't hide content */}
-            <div ref={messagesEndRef} className="h-4" />
-          </div>
-        </CardContent>
-        
-        <CardFooter className="sticky bottom-0 bg-slate-800/50 border-t border-slate-700/50 p-4 mt-auto">
+            </div>
+          )}
+          
+          {/* Scroll anchor with extra padding to ensure input doesn't hide content */}
+          <div ref={messagesEndRef} className="h-4" />
+        </div>
+      </div>
+      
+      {/* Fixed Input Container */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50">
+        <div className="max-w-4xl mx-auto p-4">
           <div className="flex w-full gap-2">
             <Input
               value={inputValue}
@@ -223,8 +225,8 @@ export default function ChatWindow() {
               Send
             </Button>
           </div>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
