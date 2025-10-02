@@ -9,6 +9,7 @@ interface HeaderProps {
 
 export default function Header({ isSidebarHidden = false }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
+  
   return (
     <header className="h-20 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700 dark:bg-slate-900/95 dark:border-slate-700 light:bg-white/95 light:border-gray-200 flex items-center transition-colors duration-300">
       <div className="flex items-center justify-between w-full px-4">

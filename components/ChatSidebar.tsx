@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useTheme } from '@/contexts/ThemeContext';
+// import { useTheme } from '@/contexts/ThemeContext';
 
 interface Chat {
   id: string;
@@ -22,7 +22,6 @@ interface ChatSidebarProps {
 }
 
 export default function ChatSidebar({ onNewChat, isOpen, onToggle, isHidden = false, currentChatId, onChatSelect }: ChatSidebarProps) {
-  const { theme } = useTheme();
   const [chats, setChats] = useState<Chat[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+// import { useTheme } from '@/contexts/ThemeContext';
 
 interface QuickAction {
   id: string;
@@ -45,7 +45,6 @@ const quickActions: QuickAction[] = [
 ];
 
 export default function QuickActions() {
-  const { theme } = useTheme();
   
   return (
     <div className="w-full max-w-4xl mx-auto px-4 pb-8">

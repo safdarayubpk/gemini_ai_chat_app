@@ -9,7 +9,7 @@ import TypingIndicator from '@/components/TypingIndicator';
 import ErrorBanner from '@/components/ErrorBanner';
 import OfflineBanner from '@/components/OfflineBanner';
 import QuickActions from '@/components/QuickActions';
-import { useTheme } from '@/contexts/ThemeContext';
+// import { useTheme } from '@/contexts/ThemeContext';
 
 interface Message {
   id: string;
@@ -23,7 +23,6 @@ interface ChatWindowProps {
 }
 
 export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps) {
-  const { theme } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+// import { useTheme } from '@/contexts/ThemeContext';
 
 interface MessageBubbleProps {
   role: "user" | "assistant";
@@ -10,7 +10,6 @@ interface MessageBubbleProps {
 }
 
 export default function MessageBubble({ role, content, time }: MessageBubbleProps) {
-  const { theme } = useTheme();
   const isUser = role === "user";
   
   return (

@@ -15,13 +15,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
-  // Handle hydration
+  // Handle hydration and theme initialization
   useEffect(() => {
     setMounted(true);
     
     // Get theme from localStorage or default to dark
     const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
+    if (savedTheme && (savedTheme === 'dark' || savedTheme === 'light')) {
       setTheme(savedTheme);
     } else {
       // Check system preference
@@ -36,14 +36,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     const root = document.documentElement;
     
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
-    }
+    // Remove all theme classes first
+    root.classList.remove('dark', 'light');
     
+    // Add the current theme class
+    root.classList.add(theme);
+    
+    // Save to localStorage
     localStorage.setItem('theme', theme);
   }, [theme, mounted]);
 
@@ -51,11 +50,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return <div className="dark">{children}</div>;
-  }
-
+  // Always render the provider, but with fallback during hydration
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
