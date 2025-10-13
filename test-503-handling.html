@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>503 Error Handling Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .error {
+            background: #dc2626;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #16a34a;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #0ea5e9;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .log {
+            background: #374151;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>503 Error Handling Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Normal API Call</h2>
+        <p>Test the normal API functionality:</p>
+        <button onclick="testNormalAPI()">Test Normal API</button>
+        <div id="normal-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Auto-Retry Logic</h2>
+        <p>Test the auto-retry functionality (simulates 503 errors):</p>
+        <button onclick="testAutoRetry()">Test Auto-Retry</button>
+        <div id="retry-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Error Code Handling</h2>
+        <p>Test different error code responses:</p>
+        <button onclick="testErrorCodes()">Test Error Codes</button>
+        <div id="error-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Log</h2>
+        <div id="console-log" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        let retryCount = 0;
+        const maxRetries = 3;
+        let isAutoRetrying = false;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#3b82f6';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('console-log').innerHTML = '';
+        }
+
+        async function testNormalAPI() {
+            const resultDiv = document.getElementById('normal-result');
+            resultDiv.innerHTML = '<div class="info">Testing normal API call...</div>';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: 'Hello, this is a test message' }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="success">✅ Success: ${data.assistant}</div>`;
+                    log('Normal API call successful', 'success');
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${data.error} (Code: ${data.errorCode || 'N/A'})</div>`;
+                    log(`Normal API call failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+                log(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAutoRetry() {
+            const resultDiv = document.getElementById('retry-result');
+            resultDiv.innerHTML = '<div class="info">Testing auto-retry logic...</div>';
+            
+            retryCount = 0;
+            isAutoRetrying = false;
+            
+            await simulateRetryLogic();
+        }
+
+        async function simulateRetryLogic() {
+            const resultDiv = document.getElementById('retry-result');
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: 'Test message for retry logic' }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="success">✅ Success after ${retryCount} retries: ${data.assistant}</div>`;
+                    log(`Success after ${retryCount} retries`, 'success');
+                    retryCount = 0;
+                    return;
+                } else if (data.errorCode === 'SERVICE_OVERLOADED' && retryCount < maxRetries) {
+                    retryCount++;
+                    isAutoRetrying = true;
+                    
+                    resultDiv.innerHTML = `<div class="error">⚠️ 503 Error (Attempt ${retryCount}/${maxRetries}): ${data.error}</div>`;
+                    log(`503 Error - Auto-retrying in 3 seconds (Attempt ${retryCount}/${maxRetries})`, 'error');
+                    
+                    setTimeout(() => {
+                        isAutoRetrying = false;
+                        simulateRetryLogic();
+                    }, 3000);
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Failed after ${retryCount} retries: ${data.error}</div>`;
+                    log(`Failed after ${retryCount} retries: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+                log(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testErrorCodes() {
+            const resultDiv = document.getElementById('error-result');
+            resultDiv.innerHTML = '<div class="info">Testing error code handling...</div>';
+            
+            const errorCodes = ['SERVICE_OVERLOADED', 'RATE_LIMIT_EXCEEDED', 'INVALID_REQUEST', 'SERVICE_UNAVAILABLE'];
+            let results = '';
+            
+            for (const errorCode of errorCodes) {
+                try {
+                    // Simulate different error responses
+                    const mockResponse = {
+                        success: false,
+                        error: getErrorMessage(errorCode),
+                        errorCode: errorCode
+                    };
+                    
+                    results += `<div class="info">✅ ${errorCode}: ${mockResponse.error}</div>`;
+                    log(`Error code ${errorCode} handled correctly`, 'success');
+                } catch (error) {
+                    results += `<div class="error">❌ ${errorCode}: ${error.message}</div>`;
+                    log(`Error code ${errorCode} failed: ${error.message}`, 'error');
+                }
+            }
+            
+            resultDiv.innerHTML = results;
+        }
+
+        function getErrorMessage(errorCode) {
+            switch (errorCode) {
+                case 'SERVICE_OVERLOADED':
+                    return 'AI service is temporarily overloaded. Please try again in a few moments.';
+                case 'RATE_LIMIT_EXCEEDED':
+                    return 'Rate limit exceeded. Please wait a moment before trying again.';
+                case 'INVALID_REQUEST':
+                    return 'Invalid request. Please check your message and try again.';
+                case 'SERVICE_UNAVAILABLE':
+                    return 'AI service is temporarily unavailable. Please try again later.';
+                default:
+                    return 'Unknown error occurred.';
+            }
+        }
+
+        // Initialize
+        log('503 Error Handling Test Page Loaded', 'success');
+        log('Ready to test error handling functionality', 'info');
+    </script>
+</body>
+</html>

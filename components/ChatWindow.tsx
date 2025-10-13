@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import MessageBubble from '@/components/MessageBubble';
 import TypingIndicator from '@/components/TypingIndicator';
 import ErrorBanner from '@/components/ErrorBanner';
 import OfflineBanner from '@/components/OfflineBanner';
 import QuickActions from '@/components/QuickActions';
+import { getLocalStorageItem, setLocalStorageItem, isValidMessage } from '@/lib/localStorage';
+import { useStreamingChat } from '@/hooks/useStreamingChat';
 // import { useTheme } from '@/contexts/ThemeContext';
 
 interface Message {
@@ -16,50 +17,115 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   time: string;
+  timestamp?: number; // Full timestamp for proper date handling
 }
 
 interface ChatWindowProps {
   isSidebarHidden?: boolean;
+  currentChatId?: string;
 }
 
-export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps) {
+export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'current-chat' }: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const streamingMessageIdRef = useRef<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [lastUserMessage, setLastUserMessage] = useState<Message | null>(null);
+  const [isAutoRetrying, setIsAutoRetrying] = useState(false);
+
+  // Initialize streaming hook with callbacks
+  const { sendMessage, cancelStream, isStreaming, streamedContent, resetStream } = useStreamingChat({
+    onChunk: (text) => {
+      // Update the streaming message in real-time
+      if (streamingMessageIdRef.current) {
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === streamingMessageIdRef.current
+              ? { ...msg, content: msg.content + text }
+              : msg
+          )
+        );
+      }
+    },
+    onComplete: (fullText) => {
+      // Finalize the streaming message
+      console.log("Streaming completed:", fullText.substring(0, 50) + "...");
+      streamingMessageIdRef.current = null;
+      setLastUserMessage(null);
+      resetStream();
+    },
+    onError: (errorMessage) => {
+      // Handle streaming errors
+      setError(errorMessage);
+      if (streamingMessageIdRef.current) {
+        // Remove incomplete message
+        setMessages(prev => prev.filter(msg => msg.id !== streamingMessageIdRef.current));
+        streamingMessageIdRef.current = null;
+      }
+    },
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Load messages from localStorage on component mount
+  // Cleanup stream on unmount
   useEffect(() => {
-    const savedMessages = localStorage.getItem('chat-messages');
-    if (savedMessages) {
-      try {
-        setMessages(JSON.parse(savedMessages));
-      } catch (error) {
-        console.error('Error loading messages from localStorage:', error);
+    return () => {
+      cancelStream();
+    };
+  }, [cancelStream]);
+
+  // Load messages from localStorage based on currentChatId
+  useEffect(() => {
+    try {
+      const chatKey = `chat-messages-${currentChatId}`;
+      const savedMessages = getLocalStorageItem<Message[]>(chatKey, []);
+      if (savedMessages.length > 0) {
+        // Validate each message has required properties
+        const validMessages = savedMessages.filter(isValidMessage);
+        
+        if (validMessages.length === savedMessages.length) {
+          setMessages(validMessages);
+        } else {
+          console.warn('Some messages have invalid format, using valid ones only');
+          setMessages(validMessages);
+          // Update localStorage with only valid messages
+          setLocalStorageItem(chatKey, validMessages);
+        }
+      } else {
+        setMessages([]);
       }
+    } catch (error) {
+      console.error('Error loading messages from localStorage:', error);
+      // Clear potentially corrupted data
+      const chatKey = `chat-messages-${currentChatId}`;
+      setLocalStorageItem(chatKey, []);
+      setMessages([]);
     }
-  }, []);
+  }, [currentChatId]);
 
   // Save messages to localStorage whenever messages change
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem('chat-messages', JSON.stringify(messages));
+      const chatKey = `chat-messages-${currentChatId}`;
+      setLocalStorageItem(chatKey, messages);
+      // Also save to the legacy key for backward compatibility
+      setLocalStorageItem('chat-messages', messages);
+      // Dispatch event to update sidebar
+      const event = new CustomEvent('messageUpdate');
+      window.dispatchEvent(event);
     }
-  }, [messages]);
+  }, [messages, currentChatId]);
 
   // Scroll to bottom when messages change (but not on initial load)
   useEffect(() => {
     if (messages.length > 0) {
       scrollToBottom();
     }
-  }, [messages, isTyping]);
+  }, [messages, isStreaming]);
 
   // Online/offline detection
   useEffect(() => {
@@ -79,13 +145,18 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
   }, []);
 
   const handleNewChatInternal = useCallback(() => {
+    // Cancel any ongoing stream
+    cancelStream();
+    
     setMessages([]);
     setError(null);
     setLastUserMessage(null);
     setInputValue('');
-    // Clear localStorage
-    localStorage.removeItem('chat-messages');
-  }, []);
+    setIsAutoRetrying(false);
+    streamingMessageIdRef.current = null;
+    resetStream();
+    // Don't clear localStorage here - let the new chat ID handle it
+  }, [cancelStream, resetStream]);
 
   // Listen for new chat events from sidebar
   useEffect(() => {
@@ -98,14 +169,16 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
   }, [handleNewChatInternal]);
 
   const handleSend = async (retryMessage?: Message) => {
+    const now = new Date();
     const messageToSend = retryMessage || {
       id: Date.now().toString(),
       role: 'user' as const,
       content: inputValue.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: now.getTime()
     };
 
-    if (!messageToSend.content.trim() || isTyping || !isOnline) return;
+    if (!messageToSend.content.trim() || isStreaming || !isOnline) return;
 
     // Clear any existing errors
     setError(null);
@@ -117,52 +190,51 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
       setLastUserMessage(messageToSend);
     }
 
-    setIsTyping(true);
+    // Create empty assistant message for streaming
+    const assistantNow = new Date();
+    const assistantMessageId = (Date.now() + 1).toString();
+    const assistantMessage: Message = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '', // Start with empty content
+      time: assistantNow.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: assistantNow.getTime()
+    };
+
+    // Add empty assistant message to display streaming content
+    setMessages(prev => [...prev, assistantMessage]);
+    streamingMessageIdRef.current = assistantMessageId;
 
     try {
-      // Call the API with all messages for context
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          messages: [...messages, messageToSend].map(msg => ({
-            role: msg.role,
-            content: msg.content
-          }))
-        }),
-      });
+      // Send message with streaming
+      await sendMessage([
+        ...messages.filter(msg => msg.id !== assistantMessageId),
+        messageToSend
+      ].map(msg => ({
+        role: msg.role,
+        content: msg.content
+      })));
 
-      const data = await response.json();
-
-      if (data.success && data.assistant) {
-        // Add assistant response from Gemini
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: data.assistant,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-
-        setMessages(prev => [...prev, assistantMessage]);
-        setLastUserMessage(null); // Clear retry message on success
-      } else {
-        // Handle API error
-        setError(data.error || 'Failed to get response from AI service');
-      }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Streaming error:', error);
       
       // Handle network error
       if (error instanceof TypeError && error.message.includes('fetch')) {
         setError('Network error. Please check your connection and try again.');
-      } else {
+      } else if (!(error instanceof Error && error.name === 'AbortError')) {
         setError('An unexpected error occurred. Please try again.');
       }
-    } finally {
-      setIsTyping(false);
     }
+  };
+
+  const handleStop = () => {
+    cancelStream();
+    
+    setIsAutoRetrying(false);
+    streamingMessageIdRef.current = null;
+    
+    // Show cancellation message
+    setError('Streaming cancelled by user');
   };
 
   const handleRetry = () => {
@@ -173,6 +245,26 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
 
   const handleDismissError = () => {
     setError(null);
+  };
+
+  const handleResend = (editedContent: string) => {
+        // Create a new message with the edited content
+        const editNow = new Date();
+        const editedMessage: Message = {
+          id: Date.now().toString(),
+          role: 'user',
+          content: editedContent,
+          time: editNow.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          timestamp: editNow.getTime()
+        };
+
+    // Add the edited message to the messages array
+    setMessages(prev => [...prev, editedMessage]);
+    setLastUserMessage(editedMessage);
+    
+    // Send the message using the retry mechanism
+    // Since we're passing a retryMessage, handleSend won't add it to messages again
+    handleSend(editedMessage);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -195,9 +287,9 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                 <h1 className="text-3xl font-bold text-slate-100 dark:text-slate-100 light:text-gray-900 mb-2 transition-colors duration-300">
                   Hello! 👋
                 </h1>
-                <p className="text-lg text-slate-300 dark:text-slate-300 light:text-gray-600 mb-1 transition-colors duration-300">
-                  I'm Gemini AI, your intelligent assistant.
-                </p>
+                    <p className="text-lg text-slate-300 dark:text-slate-300 light:text-gray-600 mb-1 transition-colors duration-300">
+                      I&apos;m Gemini AI, your intelligent assistant.
+                    </p>
                 <p className="text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
                   How can I help you today?
                 </p>
@@ -217,8 +309,8 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
               {/* Error Banner */}
               {error && (
                 <ErrorBanner 
-                  error={error} 
-                  onRetry={lastUserMessage ? handleRetry : undefined}
+                  error={isAutoRetrying ? `${error} (Auto-retrying in 3 seconds...)` : error} 
+                  onRetry={lastUserMessage && !isAutoRetrying ? handleRetry : undefined}
                   onDismiss={handleDismissError}
                 />
               )}
@@ -230,11 +322,12 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   role={message.role}
                   content={message.content}
                   time={message.time}
+                  onResend={message.role === 'user' ? handleResend : undefined}
                 />
               ))}
               
-              {/* Typing Indicator */}
-              {isTyping && (
+              {/* Typing Indicator - Show only when streaming and no content yet */}
+              {isStreaming && streamedContent === '' && (
                 <div className="flex justify-start">
                   <div className="max-w-[70%] bg-slate-800/60 dark:bg-slate-800/60 light:bg-gray-100 text-slate-100 dark:text-slate-100 light:text-gray-900 p-3 rounded-lg rounded-bl-sm transition-colors duration-300">
                     <TypingIndicator />
@@ -263,7 +356,7 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
-                  disabled={isTyping || !isOnline}
+                      disabled={isStreaming || !isOnline}
                   className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-100 border-slate-600 dark:border-slate-600 light:border-gray-300 text-slate-100 dark:text-slate-100 light:text-gray-900 placeholder:text-slate-400 dark:placeholder:text-slate-400 light:placeholder:text-gray-500"
                   style={{ 
                     height: 'auto',
@@ -278,40 +371,42 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   rows={1}
                 />
               </div>
-              <Button 
-                onClick={() => handleSend()}
-                disabled={!inputValue.trim() || isTyping || !isOnline}
-                className="h-12 w-12 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0"
-                aria-label="Send message"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      onClick={isStreaming ? handleStop : () => handleSend()}
+                      disabled={!isStreaming && (!inputValue.trim() || !isOnline)}
+                      className={`h-12 w-12 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0 transition-all duration-200 ${
+                        isStreaming 
+                          ? 'bg-amber-500 hover:bg-amber-600' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
+                      aria-label={isStreaming ? "Stop streaming" : "Send message"}
+                    >
+                      {isStreaming ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 6h12v12H6z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isStreaming ? "Stop streaming" : "Send message"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
           
           {/* Footer */}
           <div className="px-4 pb-4">
-            <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
-              <div className="flex items-center gap-4">
-                <span>Gemini can make mistakes. Consider checking important information.</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button 
-                  className="hover:text-slate-300 dark:hover:text-slate-300 light:hover:text-gray-700 transition-colors duration-300"
-                  aria-label="Keyboard shortcuts"
-                >
-                  ⌘K
-                </button>
-                <span>•</span>
-                <button 
-                  className="hover:text-slate-300 dark:hover:text-slate-300 light:hover:text-gray-700 transition-colors duration-300"
-                  aria-label="Settings"
-                >
-                  Settings
-                </button>
-              </div>
+            <div className="flex items-center justify-center text-xs text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
+              <span>Gemini can make mistakes. Consider checking important information.</span>
             </div>
           </div>
         </div>
@@ -329,7 +424,7 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
-                  disabled={isTyping || !isOnline}
+                      disabled={isStreaming || !isOnline}
                   className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-100 border-slate-600 dark:border-slate-600 light:border-gray-300 text-slate-100 dark:text-slate-100 light:text-gray-900 placeholder:text-slate-400 dark:placeholder:text-slate-400 light:placeholder:text-gray-500"
                   style={{ 
                     height: 'auto',
@@ -344,40 +439,42 @@ export default function ChatWindow({ isSidebarHidden = false }: ChatWindowProps)
                   rows={1}
                 />
               </div>
-              <Button 
-                onClick={() => handleSend()}
-                disabled={!inputValue.trim() || isTyping || !isOnline}
-                className="h-12 w-12 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0"
-                aria-label="Send message"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      onClick={isStreaming ? handleStop : () => handleSend()}
+                      disabled={!isStreaming && (!inputValue.trim() || !isOnline)}
+                      className={`h-12 w-12 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0 transition-all duration-200 ${
+                        isStreaming 
+                          ? 'bg-amber-500 hover:bg-amber-600' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
+                      aria-label={isStreaming ? "Stop streaming" : "Send message"}
+                    >
+                      {isStreaming ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 6h12v12H6z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isStreaming ? "Stop streaming" : "Send message"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
           
           {/* Footer */}
           <div className="px-4 pb-4">
-            <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
-              <div className="flex items-center gap-4">
-                <span>Gemini can make mistakes. Consider checking important information.</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button 
-                  className="hover:text-slate-300 dark:hover:text-slate-300 light:hover:text-gray-700 transition-colors duration-300"
-                  aria-label="Keyboard shortcuts"
-                >
-                  ⌘K
-                </button>
-                <span>•</span>
-                <button 
-                  className="hover:text-slate-300 dark:hover:text-slate-300 light:hover:text-gray-700 transition-colors duration-300"
-                  aria-label="Settings"
-                >
-                  Settings
-                </button>
-              </div>
+            <div className="flex items-center justify-center text-xs text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
+              <span>Gemini can make mistakes. Consider checking important information.</span>
             </div>
           </div>
         </div>

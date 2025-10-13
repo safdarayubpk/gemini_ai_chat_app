@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Toggle Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-case {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .pass {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .fail {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .pending {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .status {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .error-msg {
+            color: #721c24;
+            margin-top: 10px;
+            font-family: monospace;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Theme Toggle Test Suite</h1>
+    
+    <div class="instructions">
+        <h3>📋 Test Instructions:</h3>
+        <ol>
+            <li>Make sure your Next.js app is running on <code>http://localhost:3000</code></li>
+            <li>Click "Run All Tests" button below</li>
+            <li>Watch the test results appear</li>
+            <li>All tests should pass ✅</li>
+        </ol>
+        <p><strong>Note:</strong> This will open your app in a new tab to test theme functionality.</p>
+    </div>
+
+    <button onclick="runAllTests()">🚀 Run All Tests</button>
+    <button onclick="clearResults()">🗑️ Clear Results</button>
+
+    <div id="results"></div>
+
+    <script>
+        let testWindow = null;
+        const results = [];
+
+        function addResult(name, passed, message = '') {
+            const result = { name, passed, message, timestamp: new Date().toISOString() };
+            results.push(result);
+            displayResults();
+        }
+
+        function displayResults() {
+            const container = document.getElementById('results');
+            container.innerHTML = '<h2>Test Results:</h2>';
+            
+            results.forEach((result, index) => {
+                const div = document.createElement('div');
+                div.className = `test-case ${result.passed ? 'pass' : 'fail'}`;
+                div.innerHTML = `
+                    <strong>${index + 1}. ${result.name}</strong>
+                    <span class="status">${result.passed ? '✅ PASS' : '❌ FAIL'}</span>
+                    ${result.message ? `<div class="error-msg">${result.message}</div>` : ''}
+                `;
+                container.appendChild(div);
+            });
+
+            // Summary
+            const passed = results.filter(r => r.passed).length;
+            const total = results.length;
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = `test-case ${passed === total ? 'pass' : 'fail'}`;
+            summaryDiv.innerHTML = `
+                <h3>Summary: ${passed}/${total} tests passed</h3>
+                ${passed === total ? '<p>🎉 All tests passed! Theme toggle is working correctly!</p>' : '<p>⚠️ Some tests failed. Check the errors above.</p>'}
+            `;
+            container.appendChild(summaryDiv);
+        }
+
+        function clearResults() {
+            results.length = 0;
+            document.getElementById('results').innerHTML = '';
+            if (testWindow && !testWindow.closed) {
+                testWindow.close();
+            }
+        }
+
+        async function runAllTests() {
+            clearResults();
+            
+            // Test 1: Check if app is running
+            addResult('App Availability', false, 'Testing...');
+            
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    results[results.length - 1].passed = true;
+                    results[results.length - 1].message = 'App is running on localhost:3000';
+                } else {
+                    results[results.length - 1].message = `Server returned status: ${response.status}`;
+                }
+            } catch (error) {
+                results[results.length - 1].message = 'Cannot connect to localhost:3000. Make sure "npm run dev" is running!';
+            }
+            displayResults();
+
+            // Test 2: Open app and check for hydration errors
+            addResult('No Hydration Errors', false, 'Opening app in new window...');
+            
+            testWindow = window.open('http://localhost:3000', 'themeTest', 'width=1200,height=800');
+            
+            // Wait for window to load
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            // Test 3: Check if next-themes is loaded
+            addResult('next-themes Package', false, 'Checking...');
+            
+            try {
+                const hasNextThemes = testWindow.document.documentElement.classList.contains('dark') || 
+                                     testWindow.document.documentElement.classList.contains('light') ||
+                                     testWindow.document.documentElement.getAttribute('style');
+                
+                if (hasNextThemes) {
+                    results[results.length - 1].passed = true;
+                    results[results.length - 1].message = 'Theme classes detected on <html> element';
+                } else {
+                    results[results.length - 1].message = 'No theme classes found on <html> element';
+                }
+            } catch (error) {
+                results[results.length - 1].message = `Error: ${error.message}`;
+            }
+            displayResults();
+
+            // Test 4: Check initial theme
+            addResult('Initial Theme Set', false, 'Checking...');
+            
+            try {
+                const htmlElement = testWindow.document.documentElement;
+                const hasTheme = htmlElement.classList.contains('dark') || htmlElement.classList.contains('light');
+                
+                if (hasTheme) {
+                    const theme = htmlElement.classList.contains('dark') ? 'dark' : 'light';
+                    results[results.length - 1].passed = true;
+                    results[results.length - 1].message = `Initial theme: ${theme}`;
+                } else {
+                    results[results.length - 1].message = 'No theme class found on <html>';
+                }
+            } catch (error) {
+                results[results.length - 1].message = `Error: ${error.message}`;
+            }
+            displayResults();
+
+            // Test 5: Manual toggle instruction
+            addResult('Theme Toggle Button', false, 'Pending user action...');
+            
+            alert('📝 MANUAL TEST:\n\n1. In the opened window, click the sun/moon icon (top right)\n2. Observe if the background changes\n3. Click OK after testing');
+            
+            const userConfirm = confirm('Did the background change when you clicked the theme toggle?');
+            
+            results[results.length - 1].passed = userConfirm;
+            results[results.length - 1].message = userConfirm ? 
+                'User confirmed theme toggle works' : 
+                'User reported theme toggle not working';
+            displayResults();
+
+            // Test 6: Check localStorage
+            addResult('LocalStorage Persistence', false, 'Checking...');
+            
+            try {
+                const storedTheme = testWindow.localStorage.getItem('theme');
+                
+                if (storedTheme) {
+                    results[results.length - 1].passed = true;
+                    results[results.length - 1].message = `Theme stored in localStorage: "${storedTheme}"`;
+                } else {
+                    results[results.length - 1].message = 'No theme found in localStorage (next-themes may use different key)';
+                    // Check for next-themes specific key
+                    const keys = Object.keys(testWindow.localStorage);
+                    const themeKey = keys.find(k => k.includes('theme'));
+                    if (themeKey) {
+                        results[results.length - 1].passed = true;
+                        results[results.length - 1].message = `Theme key found: "${themeKey}" = "${testWindow.localStorage.getItem(themeKey)}"`;
+                    }
+                }
+            } catch (error) {
+                results[results.length - 1].message = `Error: ${error.message}`;
+            }
+            displayResults();
+
+            // Test 7: Console errors check
+            addResult('No Console Errors', false, 'Pending user verification...');
+            
+            alert('📝 CHECK CONSOLE:\n\n1. Press F12 to open DevTools in the test window\n2. Go to Console tab\n3. Check if there are any red errors\n4. Click OK after checking');
+            
+            const noErrors = confirm('Are there NO red errors in the console?');
+            
+            results[results.length - 1].passed = noErrors;
+            results[results.length - 1].message = noErrors ? 
+                'User confirmed no console errors' : 
+                'User reported console errors present';
+            displayResults();
+
+            // Final summary
+            const allPassed = results.every(r => r.passed);
+            
+            if (allPassed) {
+                alert('🎉 SUCCESS!\n\nAll tests passed! Your theme toggle is working correctly!');
+            } else {
+                alert('⚠️ TESTS FAILED\n\nSome tests failed. Check the results for details.');
+            }
+        }
+    </script>
+</body>
+</html>
+

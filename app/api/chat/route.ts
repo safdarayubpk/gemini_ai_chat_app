@@ -14,6 +14,7 @@ interface ChatResponse {
   success: boolean;
   assistant?: string;
   error?: string;
+  errorCode?: string;
 }
 
 interface GeminiRequest {
@@ -107,11 +108,12 @@ export async function POST(
 
     // Call Gemini API
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-goog-api-key": geminiApiKey,
         },
         body: JSON.stringify(geminiRequest),
       }
@@ -120,10 +122,48 @@ export async function POST(
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
       console.error("Gemini API error:", geminiResponse.status, errorText);
-      return NextResponse.json(
-        { success: false, error: "Failed to get response from AI service" },
-        { status: 500 }
-      );
+
+      // Handle specific error codes
+      if (geminiResponse.status === 503) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "AI service is temporarily overloaded. Please try again in a few moments.",
+            errorCode: "SERVICE_OVERLOADED",
+          },
+          { status: 503 }
+        );
+      } else if (geminiResponse.status === 429) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Rate limit exceeded. Please wait a moment before trying again.",
+            errorCode: "RATE_LIMIT_EXCEEDED",
+          },
+          { status: 429 }
+        );
+      } else if (geminiResponse.status === 400) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Invalid request. Please check your message and try again.",
+            errorCode: "INVALID_REQUEST",
+          },
+          { status: 400 }
+        );
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "AI service is temporarily unavailable. Please try again later.",
+            errorCode: "SERVICE_UNAVAILABLE",
+          },
+          { status: 500 }
+        );
+      }
     }
 
     const geminiData: GeminiResponse = await geminiResponse.json();

@@ -15,10 +15,10 @@ export default function OfflineBanner() {
       
       <div className="flex-1">
         <h3 className="text-sm font-medium text-yellow-200 mb-1">
-          You're offline
+          You&apos;re offline
         </h3>
         <p className="text-sm text-yellow-300">
-          Check your internet connection. Messages will be sent when you're back online.
+          Check your internet connection. Messages will be sent when you&apos;re back online.
         </p>
       </div>
     </div>
