@@ -2,7 +2,7 @@
 
 ## Simple Explanation
 
-**Streaming** is when AI responses appear **word-by-word in real-time**, just like someone typing, instead of waiting for the complete response.
+**Streaming** is when AI responses appear **word-by-word in real-time**, just like someone is typing, instead of waiting for the complete response.
 
 ### Visual Example:
 
