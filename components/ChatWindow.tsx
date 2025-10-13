@@ -284,13 +284,13 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
             <div className="flex-shrink-0 pt-8">
               {/* Greeting Section */}
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-slate-100 dark:text-slate-100 light:text-gray-900 mb-2 transition-colors duration-300">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors duration-300">
                   Hello! 👋
                 </h1>
-                    <p className="text-lg text-slate-300 dark:text-slate-300 light:text-gray-600 mb-1 transition-colors duration-300">
+                    <p className="text-lg text-gray-600 dark:text-slate-300 mb-1 transition-colors duration-300">
                       I&apos;m Gemini AI, your intelligent assistant.
                     </p>
-                <p className="text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
+                <p className="text-gray-500 dark:text-slate-400 transition-colors duration-300">
                   How can I help you today?
                 </p>
               </div>
@@ -329,7 +329,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
               {/* Typing Indicator - Show only when streaming and no content yet */}
               {isStreaming && streamedContent === '' && (
                 <div className="flex justify-start">
-                  <div className="max-w-[70%] bg-slate-800/60 dark:bg-slate-800/60 light:bg-gray-100 text-slate-100 dark:text-slate-100 light:text-gray-900 p-3 rounded-lg rounded-bl-sm transition-colors duration-300">
+                  <div className="max-w-[70%] bg-gray-100 dark:bg-slate-800/60 text-gray-900 dark:text-slate-100 p-3 rounded-lg rounded-bl-sm transition-colors duration-300">
                     <TypingIndicator />
                   </div>
                 </div>
@@ -345,7 +345,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
       {/* Input Container - Fixed at bottom */}
       <div className={`fixed bottom-0 right-0 backdrop-blur-sm border-t z-30 lg:block hidden transition-all duration-300 ${
         isSidebarHidden ? 'left-0' : 'left-80'
-      } bg-slate-900/95 dark:bg-slate-900/95 light:bg-white/95 border-slate-700/50 dark:border-slate-700/50 light:border-gray-200/50`}>
+      } bg-white/95 dark:bg-slate-900/95 border-gray-200/50 dark:border-slate-700/50`}>
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
@@ -357,7 +357,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
                   onKeyDown={handleKeyPress}
                   placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
                       disabled={isStreaming || !isOnline}
-                  className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-100 border-slate-600 dark:border-slate-600 light:border-gray-300 text-slate-100 dark:text-slate-100 light:text-gray-900 placeholder:text-slate-400 dark:placeholder:text-slate-400 light:placeholder:text-gray-500"
+                  className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-gray-100 dark:bg-slate-700/50 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-slate-100 placeholder:text-gray-500 dark:placeholder:text-slate-400"
                   style={{ 
                     height: 'auto',
                     minHeight: '52px'
@@ -405,7 +405,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
           
           {/* Footer */}
           <div className="px-4 pb-4">
-            <div className="flex items-center justify-center text-xs text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
+            <div className="flex items-center justify-center text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">
               <span>Gemini can make mistakes. Consider checking important information.</span>
             </div>
           </div>
@@ -413,7 +413,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
       </div>
       
       {/* Mobile Input Container - Full width on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t z-30 lg:hidden transition-all duration-300 bg-slate-900/95 dark:bg-slate-900/95 light:bg-white/95 border-slate-700/50 dark:border-slate-700/50 light:border-gray-200/50">
+      <div className="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t z-30 lg:hidden transition-all duration-300 bg-white/95 dark:bg-slate-900/95 border-gray-200/50 dark:border-slate-700/50">
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
@@ -425,7 +425,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
                   onKeyDown={handleKeyPress}
                   placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
                       disabled={isStreaming || !isOnline}
-                  className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-100 border-slate-600 dark:border-slate-600 light:border-gray-300 text-slate-100 dark:text-slate-100 light:text-gray-900 placeholder:text-slate-400 dark:placeholder:text-slate-400 light:placeholder:text-gray-500"
+                  className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-gray-100 dark:bg-slate-700/50 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-slate-100 placeholder:text-gray-500 dark:placeholder:text-slate-400"
                   style={{ 
                     height: 'auto',
                     minHeight: '52px'
@@ -473,7 +473,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
           
           {/* Footer */}
           <div className="px-4 pb-4">
-            <div className="flex items-center justify-center text-xs text-slate-400 dark:text-slate-400 light:text-gray-500 transition-colors duration-300">
+            <div className="flex items-center justify-center text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">
               <span>Gemini can make mistakes. Consider checking important information.</span>
             </div>
           </div>

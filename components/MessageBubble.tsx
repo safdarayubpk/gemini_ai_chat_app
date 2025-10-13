@@ -83,7 +83,7 @@ export default function MessageBubble({ role, content, time, onResend }: Message
           max-w-[70%] p-3 rounded-lg relative transition-all duration-300 group
           ${isUser 
             ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm' 
-            : 'bg-slate-800/60 dark:bg-slate-800/60 light:bg-gray-100 text-slate-100 dark:text-slate-100 light:text-gray-900 rounded-bl-sm'
+            : 'bg-gray-100 dark:bg-slate-800/60 text-gray-900 dark:text-slate-100 rounded-bl-sm'
           }
         `}
         aria-label={`${isUser ? 'User' : 'Assistant'} message`}
@@ -108,7 +108,7 @@ export default function MessageBubble({ role, content, time, onResend }: Message
                       h-6 w-6 p-0 rounded-md transition-all duration-200 hover:scale-105
                       ${isUser 
                         ? 'hover:bg-blue-500/20 text-blue-100 hover:text-white' 
-                        : 'hover:bg-slate-700/50 dark:hover:bg-slate-700/50 light:hover:bg-gray-200 text-slate-400 dark:text-slate-400 light:text-gray-500 hover:text-slate-200 dark:hover:text-slate-200 light:hover:text-gray-700'
+                        : 'hover:bg-gray-200 dark:hover:bg-slate-700/50 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'
                       }
                     `}
                   >
@@ -221,7 +221,7 @@ export default function MessageBubble({ role, content, time, onResend }: Message
                 <div className={`text-xs mt-1 opacity-70 transition-colors duration-300 ${
                   isUser 
                     ? 'text-blue-100' 
-                    : 'text-slate-400 dark:text-slate-400 light:text-gray-500'
+                    : 'text-gray-500 dark:text-slate-400'
                 }`}>
                   {time}
                 </div>

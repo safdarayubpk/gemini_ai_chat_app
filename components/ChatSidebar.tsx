@@ -444,26 +444,26 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle, isHidden = fa
       {/* Sidebar */}
       <div className={`
         fixed top-0 left-0 h-screen w-80 backdrop-blur-sm border-r z-50
-        bg-slate-800/95 dark:bg-slate-800/95 light:bg-gray-100/95
-        border-slate-700/50 dark:border-slate-700/50 light:border-gray-200/50
+        bg-slate-800/95 dark:bg-slate-800/95 bg-gray-100/95
+        border-slate-700/50 dark:border-slate-700/50 border-gray-200/50
         transform transition-all duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         ${isHidden ? 'lg:-translate-x-full lg:opacity-0 lg:pointer-events-none' : 'lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto'}
       `}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b border-slate-700/50 dark:border-slate-700/50 light:border-gray-200/50 transition-colors duration-300">
+          <div className="p-4 border-b border-slate-700/50 dark:border-slate-700/50 border-gray-200/50 transition-colors duration-300">
             <div className="flex items-center gap-2 mb-3">
               <button
                 onClick={onToggle}
-                className="lg:hidden p-2 hover:bg-slate-700/50 dark:hover:bg-slate-700/50 light:hover:bg-gray-200/50 rounded-lg transition-colors duration-300"
+                className="lg:hidden p-2 hover:bg-slate-700/50 dark:hover:bg-slate-700/50 hover:bg-gray-200/50 rounded-lg transition-colors duration-300"
                 aria-label="Close sidebar"
               >
-                <svg className="w-5 h-5 text-slate-300 dark:text-slate-300 light:text-gray-600 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-slate-300 dark:text-slate-300 text-gray-600 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <h2 className="text-lg font-semibold text-slate-100 dark:text-slate-100 light:text-gray-900 transition-colors duration-300">Chats</h2>
+              <h2 className="text-lg font-semibold text-slate-100 dark:text-slate-100 text-gray-900 transition-colors duration-300">Chats</h2>
             </div>
             
                 <Button
@@ -623,7 +623,7 @@ export default function ChatSidebar({ onNewChat, isOpen, onToggle, isHidden = fa
                                     onChange={(e) => setEditingTitle(e.target.value)}
                                     onKeyDown={handleKeyDown}
                                     onBlur={handleSaveEdit}
-                                    className="w-full px-2 py-1 text-sm bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-100 border border-blue-500/50 rounded text-slate-100 dark:text-slate-100 light:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-2 py-1 text-sm bg-slate-700/50 dark:bg-slate-700/50 bg-gray-100 border border-blue-500/50 rounded text-slate-100 dark:text-slate-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     autoFocus
                                   />
                                 ) : (

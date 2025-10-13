@@ -11,8 +11,8 @@ export default function GlobalErrorBoundary({ children }: GlobalErrorBoundaryPro
   return (
     <ErrorBoundary
       fallback={
-        <div className="min-h-screen bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100 light:bg-white light:text-gray-900 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-slate-800/50 dark:bg-slate-800/50 light:bg-gray-100 border border-slate-700/50 dark:border-slate-700/50 light:border-gray-200 rounded-xl p-6 text-center">
+        <div className="min-h-screen bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100 bg-white text-gray-900 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-slate-800/50 dark:bg-slate-800/50 bg-gray-100 border border-slate-700/50 dark:border-slate-700/50 border-gray-200 rounded-xl p-6 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
               <svg 
                 className="w-8 h-8 text-red-400" 
@@ -29,11 +29,11 @@ export default function GlobalErrorBoundary({ children }: GlobalErrorBoundaryPro
               </svg>
             </div>
             
-            <h1 className="text-xl font-semibold text-slate-100 dark:text-slate-100 light:text-gray-900 mb-2">
+            <h1 className="text-xl font-semibold text-slate-100 dark:text-slate-100 text-gray-900 mb-2">
               Application Error
             </h1>
             
-            <p className="text-slate-300 dark:text-slate-300 light:text-gray-600 mb-6">
+            <p className="text-slate-300 dark:text-slate-300 text-gray-600 mb-6">
               A critical error occurred in the application. Please refresh the page or contact support.
             </p>
 

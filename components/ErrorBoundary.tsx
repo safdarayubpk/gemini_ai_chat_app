@@ -55,8 +55,8 @@ class ErrorBoundary extends Component<Props, State> {
 
       // Default fallback UI
       return (
-        <div className="min-h-screen bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100 light:bg-white light:text-gray-900 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-slate-800/50 dark:bg-slate-800/50 light:bg-gray-100 border border-slate-700/50 dark:border-slate-700/50 light:border-gray-200 rounded-xl p-6 text-center">
+        <div className="min-h-screen bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100 bg-white text-gray-900 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-slate-800/50 dark:bg-slate-800/50 bg-gray-100 border border-slate-700/50 dark:border-slate-700/50 border-gray-200 rounded-xl p-6 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
               <svg 
                 className="w-8 h-8 text-red-400" 
@@ -73,11 +73,11 @@ class ErrorBoundary extends Component<Props, State> {
               </svg>
             </div>
             
-            <h1 className="text-xl font-semibold text-slate-100 dark:text-slate-100 light:text-gray-900 mb-2">
+            <h1 className="text-xl font-semibold text-slate-100 dark:text-slate-100 text-gray-900 mb-2">
               Something went wrong
             </h1>
             
-            <p className="text-slate-300 dark:text-slate-300 light:text-gray-600 mb-6">
+            <p className="text-slate-300 dark:text-slate-300 text-gray-600 mb-6">
               We&apos;re sorry, but something unexpected happened. Please try refreshing the page or contact support if the problem persists.
             </p>
 
@@ -103,7 +103,7 @@ class ErrorBoundary extends Component<Props, State> {
                 <summary className="cursor-pointer text-sm text-slate-400 hover:text-slate-300 mb-2">
                   Error Details (Development)
                 </summary>
-                <div className="bg-slate-900/50 dark:bg-slate-900/50 light:bg-gray-200 rounded-lg p-3 text-xs font-mono text-slate-300 dark:text-slate-300 light:text-gray-700 overflow-auto max-h-40">
+                <div className="bg-slate-900/50 dark:bg-slate-900/50 bg-gray-200 rounded-lg p-3 text-xs font-mono text-slate-300 dark:text-slate-300 text-gray-700 overflow-auto max-h-40">
                   <div className="mb-2">
                     <strong>Error:</strong> {this.state.error.message}
                   </div>

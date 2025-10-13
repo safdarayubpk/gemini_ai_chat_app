@@ -53,15 +53,15 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-800 dark:bg-slate-800 light:bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-slate-800 dark:bg-slate-800 bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700/50 dark:border-slate-700/50 light:border-gray-200/50">
-          <h2 className="text-lg font-semibold text-slate-100 dark:text-slate-100 light:text-gray-900">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700/50 dark:border-slate-700/50 border-gray-200/50">
+          <h2 className="text-lg font-semibold text-slate-100 dark:text-slate-100 text-gray-900">
             Settings
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-700/50 dark:hover:bg-slate-700/50 light:hover:bg-gray-200/50 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-700/50 dark:hover:bg-slate-700/50 hover:bg-gray-200/50 rounded-lg transition-colors"
             aria-label="Close settings"
           >
             <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,18 +74,18 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         <div className="p-6 space-y-6">
           {/* Chat Settings */}
           <div>
-            <h3 className="text-sm font-medium text-slate-200 dark:text-slate-200 light:text-gray-800 mb-3">
+            <h3 className="text-sm font-medium text-gray-800 dark:text-slate-200 mb-3">
               Chat History
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm text-slate-300 dark:text-slate-300 light:text-gray-600 mb-2">
+                <label className="block text-sm text-slate-300 dark:text-slate-300 text-gray-600 mb-2">
                   Maximum chats to keep
                 </label>
                 <select
                   value={chatHistoryLimit}
                   onChange={(e) => setChatHistoryLimit(parseInt(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-700/50 dark:bg-slate-700/50 light:bg-gray-100 border border-slate-600 dark:border-slate-600 light:border-gray-300 rounded-lg text-slate-100 dark:text-slate-100 light:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-slate-700/50 dark:bg-slate-700/50 bg-gray-100 border border-slate-600 dark:border-slate-600 border-gray-300 rounded-lg text-slate-100 dark:text-slate-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value={25}>25 chats</option>
                   <option value={50}>50 chats</option>
@@ -96,7 +96,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-300 dark:text-slate-300 light:text-gray-600">
+                <span className="text-sm text-slate-300 dark:text-slate-300 text-gray-600">
                   Auto-delete old chats
                 </span>
                 <button
@@ -104,7 +104,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   className={`w-12 h-6 rounded-full transition-colors ${
                     autoDelete 
                       ? 'bg-blue-600' 
-                      : 'bg-slate-600 dark:bg-slate-600 light:bg-gray-300'
+                      : 'bg-slate-600 dark:bg-slate-600 bg-gray-300'
                   }`}
                 >
                   <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
@@ -117,12 +117,12 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
           {/* Notifications */}
           <div>
-            <h3 className="text-sm font-medium text-slate-200 dark:text-slate-200 light:text-gray-800 mb-3">
+            <h3 className="text-sm font-medium text-gray-800 dark:text-slate-200 mb-3">
               Notifications
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-300 dark:text-slate-300 light:text-gray-600">
+                <span className="text-sm text-slate-300 dark:text-slate-300 text-gray-600">
                   Chat notifications
                 </span>
                 <button
@@ -130,7 +130,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   className={`w-12 h-6 rounded-full transition-colors ${
                     notifications 
                       ? 'bg-blue-600' 
-                      : 'bg-slate-600 dark:bg-slate-600 light:bg-gray-300'
+                      : 'bg-slate-600 dark:bg-slate-600 bg-gray-300'
                   }`}
                 >
                   <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
@@ -143,7 +143,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
           {/* Data Management */}
           <div>
-            <h3 className="text-sm font-medium text-slate-200 dark:text-slate-200 light:text-gray-800 mb-3">
+            <h3 className="text-sm font-medium text-gray-800 dark:text-slate-200 mb-3">
               Data Management
             </h3>
             <div className="space-y-3">
@@ -158,7 +158,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-700/50 dark:border-slate-700/50 light:border-gray-200/50">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-700/50 dark:border-slate-700/50 border-gray-200/50">
           <Button
             onClick={onClose}
             variant="ghost"
