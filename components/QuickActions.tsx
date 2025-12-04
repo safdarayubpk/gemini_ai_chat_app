@@ -44,8 +44,24 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-export default function QuickActions() {
-  
+export default function QuickActions({ onAction }: { onAction?: (prompt: string) => void }) {
+
+  const handleActionClick = (actionId: string) => {
+    if (!onAction) return;
+
+    switch (actionId) {
+      case 'write':
+        onAction("Write a creative story about ");
+        break;
+      case 'plan':
+        onAction("Create a detailed 3-day itinerary for ");
+        break;
+      case 'code':
+        onAction("Write a Python function to ");
+        break;
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4 pb-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -53,7 +69,7 @@ export default function QuickActions() {
           <button
             key={action.id}
             className="group p-6 rounded-2xl border transition-all duration-300 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 bg-gray-100 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700/50 hover:bg-gray-200 dark:hover:bg-slate-700/50 hover:border-gray-300 dark:hover:border-slate-600/50 focus:ring-offset-white dark:focus:ring-offset-slate-900"
-            onClick={action.onClick}
+            onClick={() => handleActionClick(action.id)}
             aria-label={`${action.title}: ${action.description}`}
           >
             <div className="flex items-center gap-4">

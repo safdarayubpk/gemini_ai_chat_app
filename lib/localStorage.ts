@@ -74,8 +74,17 @@ export function clearAppLocalStorage(): void {
   }
 
   try {
-    const keys = ["chat-messages", "chat-history", "theme"];
-    keys.forEach((key) => {
+    const allKeys = Object.keys(localStorage);
+    const keysToRemove = allKeys.filter(
+      (key) =>
+        key.startsWith("chat-messages") ||
+        key.startsWith("chat-history") ||
+        key.startsWith("chat-custom-title") ||
+        key.startsWith("chat-pinned") ||
+        key === "theme"
+    );
+
+    keysToRemove.forEach((key) => {
       localStorage.removeItem(key);
     });
     console.log("App localStorage cleared successfully");

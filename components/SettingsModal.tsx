@@ -19,7 +19,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       const savedLimit = localStorage.getItem('chat-history-limit');
       const savedAutoDelete = localStorage.getItem('auto-delete-chats');
       const savedNotifications = localStorage.getItem('chat-notifications');
-      
+
       if (savedLimit) setChatHistoryLimit(parseInt(savedLimit));
       if (savedAutoDelete) setAutoDelete(savedAutoDelete === 'true');
       if (savedNotifications) setNotifications(savedNotifications === 'true');
@@ -42,10 +42,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   const handleClearAllData = () => {
     if (confirm('Are you sure you want to clear all chat data? This action cannot be undone.')) {
-      localStorage.removeItem('chat-messages');
-      localStorage.removeItem('chat-history');
-      localStorage.removeItem('theme');
-      window.location.reload();
+      // Use the centralized clearing function
+      import('@/lib/localStorage').then(({ clearAppLocalStorage }) => {
+        clearAppLocalStorage();
+        window.location.reload();
+      });
     }
   };
 
@@ -94,22 +95,20 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   <option value={-1}>Unlimited</option>
                 </select>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-300 dark:text-slate-300 text-gray-600">
                   Auto-delete old chats
                 </span>
                 <button
                   onClick={() => setAutoDelete(!autoDelete)}
-                  className={`w-12 h-6 rounded-full transition-colors ${
-                    autoDelete 
-                      ? 'bg-blue-600' 
+                  className={`w-12 h-6 rounded-full transition-colors ${autoDelete
+                      ? 'bg-blue-600'
                       : 'bg-slate-600 dark:bg-slate-600 bg-gray-300'
-                  }`}
+                    }`}
                 >
-                  <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                    autoDelete ? 'translate-x-6' : 'translate-x-0.5'
-                  }`} />
+                  <div className={`w-5 h-5 bg-white rounded-full transition-transform ${autoDelete ? 'translate-x-6' : 'translate-x-0.5'
+                    }`} />
                 </button>
               </div>
             </div>
@@ -127,15 +126,13 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </span>
                 <button
                   onClick={() => setNotifications(!notifications)}
-                  className={`w-12 h-6 rounded-full transition-colors ${
-                    notifications 
-                      ? 'bg-blue-600' 
+                  className={`w-12 h-6 rounded-full transition-colors ${notifications
+                      ? 'bg-blue-600'
                       : 'bg-slate-600 dark:bg-slate-600 bg-gray-300'
-                  }`}
+                    }`}
                 >
-                  <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                    notifications ? 'translate-x-6' : 'translate-x-0.5'
-                  }`} />
+                  <div className={`w-5 h-5 bg-white rounded-full transition-transform ${notifications ? 'translate-x-6' : 'translate-x-0.5'
+                    }`} />
                 </button>
               </div>
             </div>

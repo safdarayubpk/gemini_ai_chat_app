@@ -40,8 +40,8 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
     onChunk: (text) => {
       // Update the streaming message in real-time
       if (streamingMessageIdRef.current) {
-        setMessages(prev => 
-          prev.map(msg => 
+        setMessages(prev =>
+          prev.map(msg =>
             msg.id === streamingMessageIdRef.current
               ? { ...msg, content: msg.content + text }
               : msg
@@ -78,15 +78,24 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
     };
   }, [cancelStream]);
 
-  // Load messages from localStorage based on currentChatId
+  // Reset state and load messages when currentChatId changes
   useEffect(() => {
+    // Cancel any ongoing stream and reset state
+    cancelStream();
+    resetStream();
+    setError(null);
+    setLastUserMessage(null);
+    setInputValue('');
+    setIsAutoRetrying(false);
+    streamingMessageIdRef.current = null;
+
     try {
       const chatKey = `chat-messages-${currentChatId}`;
       const savedMessages = getLocalStorageItem<Message[]>(chatKey, []);
       if (savedMessages.length > 0) {
         // Validate each message has required properties
         const validMessages = savedMessages.filter(isValidMessage);
-        
+
         if (validMessages.length === savedMessages.length) {
           setMessages(validMessages);
         } else {
@@ -105,7 +114,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
       setLocalStorageItem(chatKey, []);
       setMessages([]);
     }
-  }, [currentChatId]);
+  }, [currentChatId, cancelStream, resetStream]);
 
   // Save messages to localStorage whenever messages change
   useEffect(() => {
@@ -144,29 +153,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
     };
   }, []);
 
-  const handleNewChatInternal = useCallback(() => {
-    // Cancel any ongoing stream
-    cancelStream();
-    
-    setMessages([]);
-    setError(null);
-    setLastUserMessage(null);
-    setInputValue('');
-    setIsAutoRetrying(false);
-    streamingMessageIdRef.current = null;
-    resetStream();
-    // Don't clear localStorage here - let the new chat ID handle it
-  }, [cancelStream, resetStream]);
 
-  // Listen for new chat events from sidebar
-  useEffect(() => {
-    const handleNewChat = () => {
-      handleNewChatInternal();
-    };
-
-    window.addEventListener('newChat', handleNewChat);
-    return () => window.removeEventListener('newChat', handleNewChat);
-  }, [handleNewChatInternal]);
 
   const handleSend = async (retryMessage?: Message) => {
     const now = new Date();
@@ -217,22 +204,29 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
 
     } catch (error) {
       console.error('Streaming error:', error);
-      
-      // Handle network error
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+
+      // Handle network errors
+      if (errorMessage.toLowerCase().includes('fetch') || errorMessage.toLowerCase().includes('network')) {
         setError('Network error. Please check your connection and try again.');
-      } else if (!(error instanceof Error && error.name === 'AbortError')) {
-        setError('An unexpected error occurred. Please try again.');
+      } else {
+        // Show the actual error message (e.g., Rate limit exceeded)
+        setError(errorMessage);
       }
     }
   };
 
   const handleStop = () => {
     cancelStream();
-    
+
     setIsAutoRetrying(false);
     streamingMessageIdRef.current = null;
-    
+
     // Show cancellation message
     setError('Streaming cancelled by user');
   };
@@ -248,20 +242,20 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
   };
 
   const handleResend = (editedContent: string) => {
-        // Create a new message with the edited content
-        const editNow = new Date();
-        const editedMessage: Message = {
-          id: Date.now().toString(),
-          role: 'user',
-          content: editedContent,
-          time: editNow.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          timestamp: editNow.getTime()
-        };
+    // Create a new message with the edited content
+    const editNow = new Date();
+    const editedMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: editedContent,
+      time: editNow.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: editNow.getTime()
+    };
 
     // Add the edited message to the messages array
     setMessages(prev => [...prev, editedMessage]);
     setLastUserMessage(editedMessage);
-    
+
     // Send the message using the retry mechanism
     // Since we're passing a retryMessage, handleSend won't add it to messages again
     handleSend(editedMessage);
@@ -287,34 +281,43 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2 transition-colors duration-300">
                   Hello! 👋
                 </h1>
-                    <p className="text-lg text-gray-600 dark:text-slate-300 mb-1 transition-colors duration-300">
-                      I&apos;m Gemini AI, your intelligent assistant.
-                    </p>
+                <p className="text-lg text-gray-600 dark:text-slate-300 mb-1 transition-colors duration-300">
+                  I&apos;m Gemini AI, your intelligent assistant.
+                </p>
                 <p className="text-gray-500 dark:text-slate-400 transition-colors duration-300">
                   How can I help you today?
                 </p>
               </div>
-              
+
               {/* Quick Actions */}
-              <QuickActions />
+              <QuickActions onAction={(prompt) => {
+                setInputValue(prompt);
+                // Focus the textarea
+                const textarea = document.querySelector('textarea');
+                if (textarea) {
+                  textarea.focus();
+                  // Set cursor to end
+                  textarea.setSelectionRange(prompt.length, prompt.length);
+                }
+              }} />
             </div>
           )}
-          
+
           {/* Messages Container */}
           <div className="p-4 pb-4">
             <div className="space-y-2">
               {/* Offline Banner */}
               {!isOnline && <OfflineBanner />}
-              
+
               {/* Error Banner */}
               {error && (
-                <ErrorBanner 
-                  error={isAutoRetrying ? `${error} (Auto-retrying in 3 seconds...)` : error} 
+                <ErrorBanner
+                  error={isAutoRetrying ? `${error} (Auto-retrying in 3 seconds...)` : error}
                   onRetry={lastUserMessage && !isAutoRetrying ? handleRetry : undefined}
                   onDismiss={handleDismissError}
                 />
               )}
-              
+
               {/* Messages */}
               {messages.map((message) => (
                 <MessageBubble
@@ -325,7 +328,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
                   onResend={message.role === 'user' ? handleResend : undefined}
                 />
               ))}
-              
+
               {/* Typing Indicator - Show only when streaming and no content yet */}
               {isStreaming && streamedContent === '' && (
                 <div className="flex justify-start">
@@ -334,18 +337,17 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
                   </div>
                 </div>
               )}
-              
+
               {/* Scroll anchor */}
               <div ref={messagesEndRef} className="h-4" />
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Input Container - Fixed at bottom */}
-      <div className={`fixed bottom-0 right-0 backdrop-blur-sm border-t z-30 lg:block hidden transition-all duration-300 ${
-        isSidebarHidden ? 'left-0' : 'left-80'
-      } bg-white/95 dark:bg-slate-900/95 border-gray-200/50 dark:border-slate-700/50`}>
+      <div className={`fixed bottom-0 right-0 backdrop-blur-sm border-t z-30 lg:block hidden transition-all duration-300 ${isSidebarHidden ? 'left-0' : 'left-80'
+        } bg-white/95 dark:bg-slate-900/95 border-gray-200/50 dark:border-slate-700/50`}>
         <div className="max-w-4xl mx-auto">
           {/* Input Area */}
           <div className="p-4">
@@ -356,9 +358,9 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
-                      disabled={isStreaming || !isOnline}
+                  disabled={isStreaming || !isOnline}
                   className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-gray-100 dark:bg-slate-700/50 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-slate-100 placeholder:text-gray-500 dark:placeholder:text-slate-400"
-                  style={{ 
+                  style={{
                     height: 'auto',
                     minHeight: '52px'
                   }}
@@ -374,14 +376,13 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
+                    <Button
                       onClick={isStreaming ? handleStop : () => handleSend()}
                       disabled={!isStreaming && (!inputValue.trim() || !isOnline)}
-                      className={`h-12 w-12 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0 transition-all duration-200 ${
-                        isStreaming 
-                          ? 'bg-amber-500 hover:bg-amber-600' 
-                          : 'bg-blue-600 hover:bg-blue-700'
-                      }`}
+                      className={`h-12 w-12 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0 transition-all duration-200 ${isStreaming
+                        ? 'bg-amber-500 hover:bg-amber-600'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
                       aria-label={isStreaming ? "Stop streaming" : "Send message"}
                     >
                       {isStreaming ? (
@@ -402,7 +403,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
               </TooltipProvider>
             </div>
           </div>
-          
+
           {/* Footer */}
           <div className="px-4 pb-4">
             <div className="flex items-center justify-center text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">
@@ -411,7 +412,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
           </div>
         </div>
       </div>
-      
+
       {/* Mobile Input Container - Full width on mobile */}
       <div className="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t z-30 lg:hidden transition-all duration-300 bg-white/95 dark:bg-slate-900/95 border-gray-200/50 dark:border-slate-700/50">
         <div className="max-w-4xl mx-auto">
@@ -424,9 +425,9 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder={messages.length === 0 ? "Ask me anything..." : "Continue the conversation..."}
-                      disabled={isStreaming || !isOnline}
+                  disabled={isStreaming || !isOnline}
                   className="w-full min-h-[52px] max-h-32 px-4 py-3 border focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed rounded-xl resize-none overflow-hidden transition-colors duration-300 bg-gray-100 dark:bg-slate-700/50 border-gray-300 dark:border-slate-600 text-gray-900 dark:text-slate-100 placeholder:text-gray-500 dark:placeholder:text-slate-400"
-                  style={{ 
+                  style={{
                     height: 'auto',
                     minHeight: '52px'
                   }}
@@ -442,14 +443,13 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
+                    <Button
                       onClick={isStreaming ? handleStop : () => handleSend()}
                       disabled={!isStreaming && (!inputValue.trim() || !isOnline)}
-                      className={`h-12 w-12 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0 transition-all duration-200 ${
-                        isStreaming 
-                          ? 'bg-amber-500 hover:bg-amber-600' 
-                          : 'bg-blue-600 hover:bg-blue-700'
-                      }`}
+                      className={`h-12 w-12 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex-shrink-0 transition-all duration-200 ${isStreaming
+                        ? 'bg-amber-500 hover:bg-amber-600'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
                       aria-label={isStreaming ? "Stop streaming" : "Send message"}
                     >
                       {isStreaming ? (
@@ -470,7 +470,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
               </TooltipProvider>
             </div>
           </div>
-          
+
           {/* Footer */}
           <div className="px-4 pb-4">
             <div className="flex items-center justify-center text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">
