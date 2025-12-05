@@ -9,19 +9,30 @@ import ChatSidebar from '@/components/ChatSidebar';
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarHidden, setSidebarHidden] = useState(false);
-  const [currentChatId, setCurrentChatId] = useState<string>('current-chat');
+  const [currentChatId, setCurrentChatId] = useState<string>('');
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Generate unique initial chat ID on mount
+  useEffect(() => {
+    // Only generate if not already set (though with empty dependency array it runs once)
+    if (!currentChatId) {
+      const initialChatId = `chat-${Date.now()}`;
+      setCurrentChatId(initialChatId);
+      setIsInitialized(true);
+    }
+  }, []);
 
   const handleNewChat = () => {
     // Generate unique chat ID
     const newChatId = `chat-${Date.now()}`;
-    
+
     // Dispatch event to clear chat messages
     const event = new CustomEvent('newChat');
     window.dispatchEvent(event);
-    
+
     // Update current chat ID to new unique ID
     setCurrentChatId(newChatId);
-    
+
     // Close sidebar on mobile after new chat
     setSidebarOpen(false);
   };
@@ -42,7 +53,7 @@ export default function Home() {
 
     window.addEventListener('toggleSidebar', handleToggleSidebar);
     window.addEventListener('hideSidebar', handleHideSidebar);
-    
+
     return () => {
       window.removeEventListener('toggleSidebar', handleToggleSidebar);
       window.removeEventListener('hideSidebar', handleHideSidebar);
@@ -68,37 +79,44 @@ export default function Home() {
     window.scrollTo(0, 0);
   }, []);
 
+  // Prevent rendering until chat ID is initialized
+  if (!isInitialized) {
+    return (
+      <div className="h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
-        <div className="h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-300">
-          {/* Sidebar - Fixed from top to bottom */}
-          <ChatSidebar 
-            onNewChat={handleNewChat} 
-            isOpen={sidebarOpen} 
-            onToggle={() => setSidebarOpen(!sidebarOpen)}
-            isHidden={sidebarHidden}
-            currentChatId={currentChatId}
-            onChatSelect={handleChatSelect}
-          />
-      
+    <div className="h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-300">
+      {/* Sidebar - Fixed from top to bottom */}
+      <ChatSidebar
+        onNewChat={handleNewChat}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        isHidden={sidebarHidden}
+        currentChatId={currentChatId}
+        onChatSelect={handleChatSelect}
+      />
+
       {/* Header - Fixed at top of main content */}
-      <div className={`fixed top-0 right-0 z-40 lg:block hidden transition-all duration-300 ${
-        sidebarHidden ? 'left-0' : 'left-80'
-      }`}>
+      <div className={`fixed top-0 right-0 z-40 lg:block hidden transition-all duration-300 ${sidebarHidden ? 'left-0' : 'left-80'
+        }`}>
         <Header isSidebarHidden={sidebarHidden} />
       </div>
-      
+
       {/* Mobile Header - Full width on mobile */}
       <div className="fixed top-0 left-0 right-0 z-40 lg:hidden">
         <Header isSidebarHidden={false} />
       </div>
-      
+
       {/* Chat Window - Takes remaining space */}
-      <div className={`h-full pt-20 transition-all duration-300 ${
-        sidebarHidden ? 'lg:pl-0' : 'lg:pl-80'
-      }`}>
+      <div className={`h-full pt-20 transition-all duration-300 ${sidebarHidden ? 'lg:pl-0' : 'lg:pl-80'
+        }`}>
         <ChatWindow isSidebarHidden={sidebarHidden} currentChatId={currentChatId} />
       </div>
-      
+
       {/* LocalStorage Debug - Only in development */}
       {/* <LocalStorageDebug /> */}
     </div>

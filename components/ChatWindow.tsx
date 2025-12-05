@@ -93,8 +93,10 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
       const chatKey = `chat-messages-${currentChatId}`;
       const savedMessages = getLocalStorageItem<Message[]>(chatKey, []);
       if (savedMessages.length > 0) {
-        // Validate each message has required properties
-        const validMessages = savedMessages.filter(isValidMessage);
+        // Validate each message has required properties and non-empty content
+        const validMessages = savedMessages.filter(msg =>
+          isValidMessage(msg) && msg.content.trim().length > 0
+        );
 
         if (validMessages.length === savedMessages.length) {
           setMessages(validMessages);
@@ -121,8 +123,7 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
     if (messages.length > 0) {
       const chatKey = `chat-messages-${currentChatId}`;
       setLocalStorageItem(chatKey, messages);
-      // Also save to the legacy key for backward compatibility
-      setLocalStorageItem('chat-messages', messages);
+
       // Dispatch event to update sidebar
       const event = new CustomEvent('messageUpdate');
       window.dispatchEvent(event);
