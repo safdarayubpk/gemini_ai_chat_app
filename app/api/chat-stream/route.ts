@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         try {
           // Call Gemini API with streaming enabled
           const geminiResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:streamGenerateContent?alt=sse`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse`,
             {
               method: "POST",
               headers: {

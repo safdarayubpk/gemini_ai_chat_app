@@ -76,6 +76,8 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
         const decoder = new TextDecoder();
         let fullText = "";
 
+        let isStreamCompleted = false;
+
         while (true) {
           const { done, value } = await reader.read();
 
@@ -95,6 +97,7 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
 
               if (data.trim() === "[DONE]") {
                 // Stream completed
+                isStreamCompleted = true;
                 if (options.onComplete) {
                   options.onComplete(fullText);
                 }
@@ -136,6 +139,15 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
               }
             }
           }
+        }
+
+        // Check for premature closure
+        if (!isStreamCompleted && fullText.length > 0) {
+          const errorMsg = "Stream interrupted before completion";
+          if (options.onError) {
+            options.onError(errorMsg);
+          }
+          throw new Error(errorMsg);
         }
 
         return fullText;
