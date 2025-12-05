@@ -52,6 +52,12 @@ export default function ChatWindow({ isSidebarHidden = false, currentChatId = 'c
     onComplete: (fullText) => {
       // Finalize the streaming message
       console.log("Streaming completed:", fullText.substring(0, 50) + "...");
+
+      if (!fullText.trim()) {
+        // If response is empty, remove the message
+        setMessages(prev => prev.filter(msg => msg.id !== streamingMessageIdRef.current));
+      }
+
       streamingMessageIdRef.current = null;
       setLastUserMessage(null);
       resetStream();
